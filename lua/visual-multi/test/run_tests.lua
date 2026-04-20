@@ -3,10 +3,10 @@
 
 local M = {}
 
-function M.run_all()
-  print("\n" .. string.rep("=", 60))
-  print("Visual Multi Lua Test Suite")
-  print(string.rep("=", 60))
+function M.run_all ()
+  print ("\n" .. string.rep ("=", 60))
+  print ("Visual Multi Lua Test Suite")
+  print (string.rep ("=", 60))
 
   local all_passed = true
   local total_pass = 0
@@ -22,37 +22,37 @@ function M.run_all()
     { name = "Phase 5", path = "visual-multi.test.phase5_spec" },
   }
 
-  for _, test in ipairs(test_modules) do
-    print("\n" .. string.rep("-", 40))
-    print("Running " .. test.name .. " tests...")
-    print(string.rep("-", 40))
+  for _, test in ipairs (test_modules) do
+    print ("\n" .. string.rep ("-", 40))
+    print ("Running " .. test.name .. " tests...")
+    print (string.rep ("-", 40))
 
-    local ok, module = pcall(require, test.path)
+    local ok, module = pcall (require, test.path)
     if ok and module and module.run_all then
-      local passed = module.run_all()
+      local passed = module.run_all ()
       total_pass = total_pass + (module.pass_count or 0)
       total_fail = total_fail + (module.fail_count or 0)
       if not passed then
         all_passed = false
       end
     else
-      print("[ERROR] Failed to load test module: " .. test.path)
+      print ("[ERROR] Failed to load test module: " .. test.path)
       total_fail = total_fail + 1
       all_passed = false
     end
   end
 
-  print("\n" .. string.rep("=", 60))
-  print("TOTAL RESULTS")
-  print(string.rep("=", 60))
-  print("Total Passed: " .. total_pass)
-  print("Total Failed: " .. total_fail)
-  print(string.rep("=", 60))
+  print ("\n" .. string.rep ("=", 60))
+  print ("TOTAL RESULTS")
+  print (string.rep ("=", 60))
+  print ("Total Passed: " .. total_pass)
+  print ("Total Failed: " .. total_fail)
+  print (string.rep ("=", 60))
 
   if all_passed then
-    print("\n✓ ALL TESTS PASSED")
+    print ("\n✓ ALL TESTS PASSED")
   else
-    print("\n✗ SOME TESTS FAILED")
+    print ("\n✗ SOME TESTS FAILED")
   end
 
   return all_passed
@@ -60,7 +60,7 @@ end
 
 -- Run tests if executed directly
 if vim and vim.api then
-  M.run_all()
+  M.run_all ()
 end
 
 return M

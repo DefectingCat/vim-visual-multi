@@ -12,40 +12,40 @@ local Funcs
 local V
 local v
 
-function M.set()
+function M.set ()
   local F = V.Funcs
   local vars = V.Vars
 
   -- Disable folding, but keep winline
   if vim.o.foldenable then
-    F.Scroll.get(1)
+    F.Scroll.get (1)
     vars.oldfold = 1
     vim.o.foldenable = false
-    F.Scroll.restore()
+    F.Scroll.restore ()
   end
 
-  local case_setting = vim.g.VM_case_setting or ''
-  if case_setting:lower() == 'smart' then
+  local case_setting = vim.g.VM_case_setting or ""
+  if case_setting:lower () == "smart" then
     vim.o.smartcase = true
     vim.o.ignorecase = true
-  elseif case_setting:lower() == 'sensitive' then
+  elseif case_setting:lower () == "sensitive" then
     vim.o.smartcase = false
     vim.o.ignorecase = false
-  elseif case_setting:lower() == 'ignore' then
+  elseif case_setting:lower () == "ignore" then
     vim.o.smartcase = false
     vim.o.ignorecase = true
   end
 
   -- Force default register
-  vim.o.clipboard = ''
+  vim.o.clipboard = ""
 
   -- Disable conceal
-  local comp = require('visual-multi.comp')
-  vim.bo.conceallevel = comp.conceallevel() and 0 or vim.bo.conceallevel
-  vim.bo.concealcursor = ''
+  local comp = require ("visual-multi.comp")
+  vim.bo.conceallevel = comp.conceallevel () and 0 or vim.bo.conceallevel
+  vim.bo.concealcursor = ""
 
-  vim.o.virtualedit = 'onemore'
-  vim.o.whichwrap = 'h,l,<,>'
+  vim.o.virtualedit = "onemore"
+  vim.o.whichwrap = "h,l,<,>"
   vim.o.lazyredraw = true
 
   local cmdheight = vim.g.VM_cmdheight or 1
@@ -54,16 +54,16 @@ function M.set()
   end
 end
 
-function M.init()
+function M.init ()
   local F = V.Funcs
   local vars = V.Vars
 
   -- Init search
-  vars.def_reg = F.default_reg()
-  vars.oldreg = F.get_reg()
-  vars.oldregs_1_9 = F.get_regs_1_9()
-  vars.oldsearch = {vim.fn.getreg('/'), vim.fn.getregtype('/')}
-  vars.noh = not vim.v.hlsearch and 'noh|' or ''
+  vars.def_reg = F.default_reg ()
+  vars.oldreg = F.get_reg ()
+  vars.oldregs_1_9 = F.get_regs_1_9 ()
+  vars.oldsearch = { vim.fn.getreg ("/"), vim.fn.getregtype ("/") }
+  vars.noh = not vim.v.hlsearch and "noh|" or ""
 
   -- Store old vars
   vars.oldhls = vim.o.hlsearch
@@ -71,11 +71,11 @@ function M.init()
   vars.oldwhichwrap = vim.o.whichwrap
   vars.oldlz = vim.o.lazyredraw
   vars.oldch = vim.o.cmdheight
-  vars.oldcase = {vim.o.smartcase, vim.o.ignorecase}
+  vars.oldcase = { vim.o.smartcase, vim.o.ignorecase }
   vars.indentkeys = vim.bo.indentkeys
   vars.cinkeys = vim.bo.cinkeys
   vars.synmaxcol = vim.bo.synmaxcol
-  vars.oldmatches = vim.fn.getmatches()
+  vars.oldmatches = vim.fn.getmatches ()
   vars.clipboard = vim.o.clipboard
   vars.textwidth = vim.bo.textwidth
   vars.conceallevel = vim.bo.conceallevel
@@ -103,15 +103,15 @@ function M.init()
   vars.winline = 0
   vars.restore_scroll = 0
   vars.find_all_overlap = 0
-  vars.dot = ''
+  vars.dot = ""
   vars.no_search = 0
   vars.visual_regex = 0
   vars.use_register = vars.def_reg
   vars.deleting = 0
-  vars.vmarks = {vim.fn.getpos("'<"), vim.fn.getpos("'>")}
+  vars.vmarks = { vim.fn.getpos ("'<"), vim.fn.getpos ("'>") }
 end
 
-function M.reset()
+function M.reset ()
   local vars = V.Vars
 
   if not vars.oldhls then
@@ -141,7 +141,7 @@ function M.reset()
   vim.b.VM_skip_reset_once_on_bufleave = nil
 end
 
-function M.reset_globals()
+function M.reset_globals ()
   vim.b.VM_Backup = {}
   vim.b.VM_Selection = {}
   vim.g.Vm.buffer = 0
@@ -150,7 +150,7 @@ function M.reset_globals()
 end
 
 -- Initialize module with state
-function M.init_state(state)
+function M.init_state (state)
   V = state
   v = V.Vars
 end

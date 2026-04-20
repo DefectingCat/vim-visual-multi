@@ -13,12 +13,12 @@ local Funcs
 local V
 local v
 
-function M.init()
-  State = require('visual-multi.state')
-  Global = require('visual-multi.global')
-  Funcs = require('visual-multi.funcs')
+function M.init ()
+  State = require ("visual-multi.state")
+  Global = require ("visual-multi.global")
+  Funcs = require ("visual-multi.funcs")
 
-  V = State.get()
+  V = State.get ()
   v = V.vars
 
   return M
@@ -28,9 +28,9 @@ end
 -- Permanent plugs (non-buffer keys)
 -- ===========================================================================
 
-function M.permanent()
+function M.permanent ()
   -- Plugs and mappings for non <buffer> keys
-  vim.cmd([[
+  vim.cmd ([[
     xmap <expr><silent>     <Plug>(VM-Visual-Find)             vm#operators#find(1, 1)
 
     nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
@@ -61,9 +61,15 @@ function M.permanent()
   ]])
 
   -- Select motions
-  vim.g.Vm.select_motions = {'h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', 'ge', 'gE', 'BBW'}
-  for _, m in ipairs(vim.g.Vm.select_motions) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-Select-" .. m .. ") :\\<C-u>call vm#commands#motion('" .. m .. "', v:count1, 1, 0)\\<cr>")
+  vim.g.Vm.select_motions = { "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", "ge", "gE", "BBW" }
+  for _, m in ipairs (vim.g.Vm.select_motions) do
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Select-"
+        .. m
+        .. ") :\\<C-u>call vm#commands#motion('"
+        .. m
+        .. "', v:count1, 1, 0)\\<cr>"
+    )
   end
 end
 
@@ -71,18 +77,42 @@ end
 -- Buffer plugs (buffer-local keys)
 -- ===========================================================================
 
-function M.buffer()
+function M.buffer ()
   -- Plugs and mappings for <buffer> keys
-  vim.g.Vm.motions = {'h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\\|'}
-  vim.g.Vm.find_motions = {'f', 'F', 't', 'T'}
+  vim.g.Vm.motions = {
+    "h",
+    "j",
+    "k",
+    "l",
+    "w",
+    "W",
+    "b",
+    "B",
+    "e",
+    "E",
+    ",",
+    ";",
+    "$",
+    "0",
+    "^",
+    "%",
+    "ge",
+    "gE",
+    "\\|",
+  }
+  vim.g.Vm.find_motions = { "f", "F", "t", "T" }
   vim.g.Vm.tobj_motions = {
-    ['{'] = '{', ['}'] = '}',
-    ['('] = '(', [')'] = ')',
-    ['g{'] = '[{', ['g}'] = ']}',
-    ['g)'] = '])', ['g('] = '[('
+    ["{"] = "{",
+    ["}"] = "}",
+    ["("] = "(",
+    [")"] = ")",
+    ["g{"] = "[{",
+    ["g}"] = "]}",
+    ["g)"] = "])",
+    ["g("] = "[(",
   }
 
-  vim.cmd([[
+  vim.cmd ([[
     nnoremap <silent>       <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(v:count)<cr>
     nmap <expr><silent>     <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
 
@@ -136,59 +166,101 @@ function M.buffer()
   ]])
 
   -- Motion mappings
-  for _, m in ipairs(vim.g.Vm.motions) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-Motion-" .. m .. ") :\\<C-u>call vm#commands#motion('" .. m .. "', v:count1, 0, 0)\\<cr>")
-    vim.cmd("nnoremap <silent> <Plug>(VM-Single-Motion-" .. m .. ") :\\<C-u>call vm#commands#motion('" .. m .. "',v:count1, 0, 1)\\<cr>")
+  for _, m in ipairs (vim.g.Vm.motions) do
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Motion-"
+        .. m
+        .. ") :\\<C-u>call vm#commands#motion('"
+        .. m
+        .. "', v:count1, 0, 0)\\<cr>"
+    )
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Single-Motion-"
+        .. m
+        .. ") :\\<C-u>call vm#commands#motion('"
+        .. m
+        .. "',v:count1, 0, 1)\\<cr>"
+    )
   end
 
-  for _, m in ipairs(vim.g.Vm.find_motions) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-Motion-" .. m .. ") :call vm#commands#find_motion('" .. m .. "', '')\\<cr>")
+  for _, m in ipairs (vim.g.Vm.find_motions) do
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Motion-"
+        .. m
+        .. ") :call vm#commands#find_motion('"
+        .. m
+        .. "', '')\\<cr>"
+    )
   end
 
   local tobj = vim.g.Vm.tobj_motions
-  for m, val in pairs(tobj) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-Motion-" .. m .. ") :\\<C-u>call vm#commands#motion('" .. val .. "', v:count1, 0, 0)\\<cr>")
+  for m, val in pairs (tobj) do
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Motion-"
+        .. m
+        .. ") :\\<C-u>call vm#commands#motion('"
+        .. val
+        .. "', v:count1, 0, 0)\\<cr>"
+    )
   end
 
-  for _, m in ipairs(vim.g.Vm.select_motions) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-Single-Select-" .. m .. ") :\\<C-u>call vm#commands#motion('" .. m .. "', v:count1, 1, 1)\\<cr>")
+  for _, m in ipairs (vim.g.Vm.select_motions) do
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Single-Select-"
+        .. m
+        .. ") :\\<C-u>call vm#commands#motion('"
+        .. m
+        .. "', v:count1, 1, 1)\\<cr>"
+    )
   end
 
   -- User operators
   vim.g.Vm.user_ops = {}
-  for _, op in ipairs(vim.g.VM_user_operators or {}) do
+  for _, op in ipairs (vim.g.VM_user_operators or {}) do
     local key, val
-    if type(op) == 'table' then
-      key = next(op)
+    if type (op) == "table" then
+      key = next (op)
       val = op[key]
     else
       key = op
       val = 0
     end
     vim.g.Vm.user_ops[key] = val
-    vim.cmd("nnoremap <silent> <Plug>(VM-User-Operator-" .. key .. ") :\\<C-u>call <sid>Operator('" .. key .. "', v:count1, v:register)\\<cr>")
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-User-Operator-"
+        .. key
+        .. ") :\\<C-u>call <sid>Operator('"
+        .. key
+        .. "', v:count1, v:register)\\<cr>"
+    )
   end
 
   -- Custom remaps
   local remaps = vim.g.VM_custom_remaps or {}
-  for m, val in pairs(remaps) do
-    vim.cmd("nmap <silent> <Plug>(VM-Remap-" .. val .. ") " .. val)
+  for m, val in pairs (remaps) do
+    vim.cmd ("nmap <silent> <Plug>(VM-Remap-" .. val .. ") " .. val)
   end
 
   -- Custom noremaps
   local noremaps = vim.g.VM_custom_noremaps or {}
-  for _, m in pairs(noremaps) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-Normal!-" .. m .. ") :\\<C-u>call b:VM_Selection.Edit.run_normal('" .. m .. "', {'count': v:count1, 'recursive': 0})\\<cr>")
+  for _, m in pairs (noremaps) do
+    vim.cmd (
+      "nnoremap <silent> <Plug>(VM-Normal!-"
+        .. m
+        .. ") :\\<C-u>call b:VM_Selection.Edit.run_normal('"
+        .. m
+        .. "', {'count': v:count1, 'recursive': 0})\\<cr>"
+    )
   end
 
   -- Custom commands
   local cm = vim.g.VM_custom_commands or {}
-  for m, val in pairs(cm) do
-    vim.cmd("nnoremap <silent> <Plug>(VM-" .. m .. ") " .. val)
+  for m, val in pairs (cm) do
+    vim.cmd ("nnoremap <silent> <Plug>(VM-" .. m .. ") " .. val)
   end
 
   -- Edit commands
-  vim.cmd([[
+  vim.cmd ([[
     nnoremap <silent>        <Plug>(VM-Shrink)                  :call vm#commands#shrink_or_enlarge(1)<cr>
     nnoremap <silent>        <Plug>(VM-Enlarge)                 :call vm#commands#shrink_or_enlarge(0)<cr>
     nnoremap <silent>        <Plug>(VM-Merge-To-Eol)            :call vm#commands#merge_to_beol(1, 0)<cr>
@@ -256,7 +328,7 @@ function M.buffer()
   ]])
 
   -- Insert mode mappings
-  vim.cmd([[
+  vim.cmd ([[
     inoremap <silent><expr> <Plug>(VM-I-Arrow-w)          <sid>Insert('w')
     inoremap <silent><expr> <Plug>(VM-I-Arrow-b)          <sid>Insert('b')
     inoremap <silent><expr> <Plug>(VM-I-Arrow-W)          <sid>Insert('W')
@@ -291,7 +363,7 @@ function M.buffer()
   ]])
 
   -- Cmdline
-  vim.cmd([[
+  vim.cmd ([[
     nnoremap         <expr> <Plug>(VM-:)                  vm#commands#regex_reset(':')
     nnoremap         <expr> <Plug>(VM-/)                  vm#commands#regex_reset('/')
     nnoremap         <expr> <Plug>(VM-?)                  vm#commands#regex_reset('?')

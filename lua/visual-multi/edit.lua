@@ -14,30 +14,30 @@ local Config
 local Bytes
 
 -- Buffer-local state references
-local V        -- b:VM_Selection (State buffer state)
-local v        -- V.vars (plugin variables)
+local V -- b:VM_Selection (State buffer state)
+local v -- V.vars (plugin variables)
 local v_regions -- V.regions (regions table)
 
 -- Cached lambdas (equivalent to VimScript s:R, s:X)
-local R_fn     -- returns V.regions
-local X_fn     -- returns g:Vm.extend_mode
+local R_fn -- returns V.regions
+local X_fn -- returns g:Vm.extend_mode
 
-function M.init()
-  State = require('visual-multi.state')
-  Global = require('visual-multi.global')
-  Region = require('visual-multi.region')
-  Funcs = require('visual-multi.funcs')
-  Config = require('visual-multi.config')
+function M.init ()
+  State = require ("visual-multi.state")
+  Global = require ("visual-multi.global")
+  Region = require ("visual-multi.region")
+  Funcs = require ("visual-multi.funcs")
+  Config = require ("visual-multi.config")
 
-  V = State.get()
+  V = State.get ()
   v = V.vars
   v_regions = V.regions
 
-  R_fn = function()
+  R_fn = function ()
     return v_regions
   end
 
-  X_fn = function()
+  X_fn = function ()
     return vim.g.Vm and vim.g.Vm.extend_mode or 0
   end
 
@@ -57,27 +57,27 @@ end
 -- run_normal: Execute normal command over regions
 -- Equivalent to s:Edit.run_normal(cmd, ...) in VimScript
 -- ===========================================================================
-function M.run_normal(cmd, opts)
+function M.run_normal (cmd, opts)
   opts = opts or {}
 
   -- cmd == -1 means prompt user for input
   if cmd == -1 then
     -- Placeholder: statusline display for NORMAL mode
-    local bang = opts.recursive == false and '!' or ''
-    local input_cmd = vim.fn.input(':normal' .. bang .. ' ')
-    if input_cmd == '' or input_cmd == nil then
-      Funcs.msg('Normal command aborted.')
+    local bang = opts.recursive == false and "!" or ""
+    local input_cmd = vim.fn.input (":normal" .. bang .. " ")
+    if input_cmd == "" or input_cmd == nil then
+      Funcs.msg ("Normal command aborted.")
       return
     end
     cmd = input_cmd
 
   -- ~ command in extend mode -> run as visual command
-  elseif cmd == '~' and X_fn() == 1 then
-    return M.run_visual('~', 0)
+  elseif cmd == "~" and X_fn () == 1 then
+    return M.run_visual ("~", 0)
 
   -- Empty command
-  elseif cmd == nil or cmd == '' then
-    Funcs.msg('No last command.')
+  elseif cmd == nil or cmd == "" then
+    Funcs.msg ("No last command.")
     return
   end
 
@@ -87,41 +87,47 @@ function M.run_normal(cmd, opts)
     count = opts.count or 1,
     vimreg = opts.vimreg or false,
     gcount = opts.gcount or 0,
-    silent = Config.get('silent_ex_commands') or 0,
+    silent = Config.get ("silent_ex_commands") or 0,
   }
 
   -- Override with provided opts
-  if opts.store ~= nil then args.store = opts.store end
-  if opts.stay_put ~= nil then args.stay_put = opts.stay_put end
-  if opts.vimreg ~= nil then args.vimreg = opts.vimreg end
+  if opts.store ~= nil then
+    args.store = opts.store
+  end
+  if opts.stay_put ~= nil then
+    args.stay_put = opts.stay_put
+  end
+  if opts.vimreg ~= nil then
+    args.vimreg = opts.vimreg
+  end
 
   -- If it's a VM internal operation (store == '§'), never use recursive mappings
-  if args.store == '\167' then  -- '§' character
+  if args.store == "\167" then -- '§' character
     args.recursive = false
   end
 
-  local n = args.count > 1 and tostring(args.count) or ''
-  local c = args.recursive and ('normal ' .. n .. cmd) or ('normal! ' .. n .. cmd)
+  local n = args.count > 1 and tostring (args.count) or ""
+  local c = args.recursive and ("normal " .. n .. cmd) or ("normal! " .. n .. cmd)
   if args.silent then
-    c = 'silent! ' .. c
+    c = "silent! " .. c
   end
 
   -- Switch to cursor mode
-  Global.cursor_mode()
+  Global.cursor_mode ()
 
   -- Before commands
-  M.before_commands()
+  M.before_commands ()
 
-  local errors = ''
+  local errors = ""
 
   -- Execute: special handler for x/X, or general processing
-  local ok, err = pcall(function()
-    if cmd:lower() == 'x' then
-      M._bs_del(n .. cmd)
+  local ok, err = pcall (function ()
+    if cmd:lower () == "x" then
+      M._bs_del (n .. cmd)
     elseif args.gcount and args.gcount ~= 0 then
-      M.process(cmd, args)
+      M.process (cmd, args)
     else
-      M.process(c, args)
+      M.process (c, args)
     end
   end)
   if not ok then
@@ -130,15 +136,15 @@ function M.run_normal(cmd, opts)
 
   -- Store for dot command replay
   g_Vm = vim.g.Vm or {}
-  g_Vm.last_normal = {cmd, args.recursive}
-  v.dot = {cmd, args.recursive}
+  g_Vm.last_normal = { cmd, args.recursive }
+  v.dot = { cmd, args.recursive }
   v.merge = 1
 
   -- After commands
-  M.after_commands(0)
+  M.after_commands (0)
 
-  if errors ~= '' then
-    Funcs.msg('[visual-multi] errors while executing ' .. c)
+  if errors ~= "" then
+    Funcs.msg ("[visual-multi] errors while executing " .. c)
   end
 end
 
@@ -146,38 +152,37 @@ end
 -- run_visual: Execute visual command over selections
 -- Equivalent to s:Edit.run_visual(cmd, recursive, ...) in VimScript
 -- ===========================================================================
-function M.run_visual(cmd, recursive, opts)
+function M.run_visual (cmd, recursive, opts)
   opts = opts or {}
 
-  if X_fn() == 0 then
-    Funcs.msg('Not possible in cursor mode.')
+  if X_fn () == 0 then
+    Funcs.msg ("Not possible in cursor mode.")
     return
   end
 
   -- cmd == -1 means prompt user for input
   if not opts._has_cmd and cmd == -1 then
     -- Placeholder: statusline display for VISUAL mode
-    local bang = recursive == false and '!' or ''
-    local input_cmd = vim.fn.input(':visual' .. bang .. ' ')
-    if input_cmd == '' or input_cmd == nil then
-      Funcs.msg('Visual command aborted.')
+    local bang = recursive == false and "!" or ""
+    local input_cmd = vim.fn.input (":visual" .. bang .. " ")
+    if input_cmd == "" or input_cmd == nil then
+      Funcs.msg ("Visual command aborted.")
       return
     end
     cmd = input_cmd
-
-  elseif cmd == nil or cmd == '' then
-    Funcs.msg('Command not found.')
+  elseif cmd == nil or cmd == "" then
+    Funcs.msg ("Command not found.")
     return
   end
 
   -- Before commands
-  M.before_commands()
+  M.before_commands ()
 
-  local errors = ''
+  local errors = ""
 
   -- Execute visual command
-  local ok, err = pcall(function()
-    M._process_visual(cmd, recursive)
+  local ok, err = pcall (function ()
+    M._process_visual (cmd, recursive)
   end)
   if not ok then
     errors = err or vim.v.errmsg
@@ -185,18 +190,18 @@ function M.run_visual(cmd, recursive, opts)
 
   -- Store for replay
   local g_Vm = vim.g.Vm or {}
-  g_Vm.last_visual = {cmd, recursive}
+  g_Vm.last_visual = { cmd, recursive }
 
   -- After commands
-  M.after_commands(0)
+  M.after_commands (0)
 
   -- Reselect if needed
-  if not M._visual_reselect(cmd) then
-    Global.change_mode()
+  if not M._visual_reselect (cmd) then
+    Global.change_mode ()
   end
 
-  if errors ~= '' then
-    Funcs.msg('[visual-multi] errors while executing ' .. cmd)
+  if errors ~= "" then
+    Funcs.msg ("[visual-multi] errors while executing " .. cmd)
   end
 end
 
@@ -204,24 +209,24 @@ end
 -- process: Execute command at cursors
 -- Equivalent to s:Edit.process(cmd, ...) in VimScript
 -- ===========================================================================
-function M.process(cmd, args)
+function M.process (cmd, args)
   args = args or {}
 
-  v.eco = 1             -- turn on eco mode
-  local change = 0      -- each cursor will update this value
-  local txt = {}        -- if text is deleted, it will be stored here
-  local size = Funcs.size()  -- initial buffer size
+  v.eco = 1 -- turn on eco mode
+  local change = 0 -- each cursor will update this value
+  local txt = {} -- if text is deleted, it will be stored here
+  local size = Funcs.size () -- initial buffer size
 
   if #v.storepos == 0 then
-    v.storepos = vim.fn.getpos('.')[2]  -- [line, col] -> just store line for simplicity
+    v.storepos = vim.fn.getpos (".")[2] -- [line, col] -> just store line for simplicity
   end
 
-  local backup_txt = args.store ~= nil    -- deleting regions, store their text
-  local write_reg = backup_txt and args.store ~= '_'  -- also write vim register unless _
+  local backup_txt = args.store ~= nil -- deleting regions, store their text
+  local write_reg = backup_txt and args.store ~= "_" -- also write vim register unless _
   local stay_put = args.stay_put or false -- don't move the cursors after command
 
   -- We want CursorMoved, even if cursor doesn't move (for older Neovim without TextYankPost)
-  local do_cursor_moved = not vim.fn.has('textyankpost') or vim.fn.has('textyankpost') == 0
+  local do_cursor_moved = not vim.fn.has ("textyankpost") or vim.fn.has ("textyankpost") == 0
 
   -- used by g<C-A>, g<C-X>
   local gcount = 0
@@ -231,61 +236,63 @@ function M.process(cmd, args)
 
   -- Store old register if we need to backup text
   if backup_txt then
-    v._oldreg = {vim.fn.getreg('"'), vim.fn.getregtype('"')}
-    vim.fn.setreg('"', '')
+    v._oldreg = { vim.fn.getreg ("\""), vim.fn.getregtype ("\"") }
+    vim.fn.setreg ("\"", "")
   end
   local must_restore_register = false
 
   -- Backup regions
-  Global.backup_regions()
+  Global.backup_regions ()
 
-  for i, r in ipairs(R_fn()) do
+  for i, r in ipairs (R_fn ()) do
     -- used in non-live edit, currently disabled
-    if v.auto == 0 and r.index == M.skip_index then goto continue end
+    if v.auto == 0 and r.index == M.skip_index then
+      goto continue
+    end
 
     -- update cursor position on the base of previous text changes
-    r:shift(change, change)
+    r:shift (change, change)
 
     -- execute command at cursor
-    vim.fn.cursor(r.l, r.a)
+    vim.fn.cursor (r.l, r.a)
 
     if gcount ~= 0 then
-      local tick = vim.fn.getbufinfo()[1].changedtick
-      local ok, _ = pcall(function()
-        vim.cmd('normal! ' .. gcount .. ' ' .. cmd)
+      local tick = vim.fn.getbufinfo ()[1].changedtick
+      local ok, _ = pcall (function ()
+        vim.cmd ("normal! " .. gcount .. " " .. cmd)
       end)
-      if vim.fn.getbufinfo()[1].changedtick > tick then
+      if vim.fn.getbufinfo ()[1].changedtick > tick then
         gcount = gcount + (args.count or 1)
       end
     else
-      local ok, _ = pcall(function()
-        vim.cmd(cmd)
+      local ok, _ = pcall (function ()
+        vim.cmd (cmd)
       end)
     end
 
     -- store deleted text during deletions/changes at cursors
     if backup_txt then
-      if vim.fn.getreg('"') == '' then
+      if vim.fn.getreg ("\"") == "" then
         backup_txt = false
         write_reg = false
         must_restore_register = true
       else
-        table.insert(txt, vim.fn.getreg(v.def_reg or '"'))
+        table.insert (txt, vim.fn.getreg (v.def_reg or "\""))
       end
     end
 
     -- update new cursor position after the command, unless specified
-    local diff = Funcs.curs2byte() - r.A
+    local diff = Funcs.curs2byte () - r.A
     if not stay_put then
-      r:shift(diff, diff)
+      r:shift (diff, diff)
     end
 
     -- update changed size
-    change = Funcs.size() - size
+    change = Funcs.size () - size
 
     -- let's force CursorMoved in case some yank command needs it
     if diff == 0 and do_cursor_moved then
-      vim.cmd('silent! doautocmd <nomodeline> CursorMoved')
+      vim.cmd ("silent! doautocmd <nomodeline> CursorMoved")
     end
 
     ::continue::
@@ -293,12 +300,11 @@ function M.process(cmd, args)
 
   if must_restore_register then
     local oldreg = v._oldreg
-    vim.fn.setreg('"', oldreg[1], oldreg[2])
-
+    vim.fn.setreg ("\"", oldreg[1], oldreg[2])
   elseif write_reg then
     -- fill VM register after deletions/changes at cursors
     -- overwrite vim register if requested
-    M._fill_register(args.store, txt, args.vimreg)
+    M._fill_register (args.store, txt, args.vimreg)
   end
 
   -- the original regions text could used by commands
@@ -311,29 +317,29 @@ end
 -- _process_visual: Process a visual command over selections
 -- Equivalent to s:Edit.process_visual(cmd, recursive) in VimScript
 -- ===========================================================================
-function M._process_visual(cmd, recursive)
-  v.eco = 1             -- turn on eco mode
-  local change = 0      -- each cursor will update this value
-  local size = Funcs.size()  -- initial buffer size
-  v.storepos = vim.fn.getpos('.')[2]
+function M._process_visual (cmd, recursive)
+  v.eco = 1 -- turn on eco mode
+  local change = 0 -- each cursor will update this value
+  local size = Funcs.size () -- initial buffer size
+  v.storepos = vim.fn.getpos (".")[2]
 
-  local c = recursive and ('normal ' .. cmd) or ('normal! ' .. cmd)
+  local c = recursive and ("normal " .. cmd) or ("normal! " .. cmd)
 
-  Global.backup_regions()
+  Global.backup_regions ()
 
-  for _, r in ipairs(R_fn()) do
-    r:shift(change, change)
+  for _, r in ipairs (R_fn ()) do
+    r:shift (change, change)
     -- Mark start of selection
-    vim.fn.cursor(r.L, r.b)
-    vim.cmd('normal! m`')
+    vim.fn.cursor (r.L, r.b)
+    vim.cmd ("normal! m`")
     -- Select region
-    vim.fn.cursor(r.l, r.a)
-    vim.cmd('normal! v``')
+    vim.fn.cursor (r.l, r.a)
+    vim.cmd ("normal! v``")
     -- Execute command
-    vim.cmd(c)
+    vim.cmd (c)
 
     -- update changed size
-    change = Funcs.size() - size
+    change = Funcs.size () - size
   end
 end
 
@@ -341,26 +347,26 @@ end
 -- post_process: Operations after command execution
 -- Equivalent to s:Edit.post_process(reselect, ...) in VimScript
 -- ===========================================================================
-function M.post_process(reselect, change_offset)
+function M.post_process (reselect, change_offset)
   if reselect then
-    Global.extend_mode()
-    for _, r in ipairs(R_fn()) do
+    Global.extend_mode ()
+    for _, r in ipairs (R_fn ()) do
       local w_offset = v.W[r.index] or 0
-      r:shift(change_offset, change_offset + w_offset)
+      r:shift (change_offset, change_offset + w_offset)
     end
   end
 
   -- remove extra spaces that may have been added
-  M.extra_spaces.remove()
+  M.extra_spaces.remove ()
 
   -- update, restore position and clear vars
   local pos
   if #v.storepos == 0 then
-    pos = '.'
+    pos = "."
   else
     pos = v.storepos
   end
-  Global.update_and_select_region(pos)
+  Global.update_and_select_region (pos)
   v.storepos = {}
 end
 
@@ -368,7 +374,7 @@ end
 -- before_commands: Disable mappings and run user autocommand
 -- Equivalent to s:Edit.before_commands() in VimScript
 -- ===========================================================================
-function M.before_commands()
+function M.before_commands ()
   v.auto = 1
   v.eco = 1
 
@@ -377,14 +383,14 @@ function M.before_commands()
   M._can_multiline = 0
 
   -- User autocommand before running commands
-  vim.cmd('silent doautocmd <nomodeline> User visual_multi_before_cmd')
+  vim.cmd ("silent doautocmd <nomodeline> User visual_multi_before_cmd")
 
   -- Disable mappings (Maps module may not exist yet, use safe calls)
   if V.Maps and V.Maps.disable then
-    V.Maps.disable(0)
+    V.Maps.disable (0)
   end
   if V.Maps and V.Maps.unmap_esc_and_toggle then
-    V.Maps.unmap_esc_and_toggle()
+    V.Maps.unmap_esc_and_toggle ()
   end
 end
 
@@ -392,25 +398,25 @@ end
 -- after_commands: Trigger post processing and reenable mappings
 -- Equivalent to s:Edit.after_commands(reselect, ...) in VimScript
 -- ===========================================================================
-function M.after_commands(reselect, change_offset)
+function M.after_commands (reselect, change_offset)
   v.multiline = M._old_multiline
 
   if reselect then
-    M.post_process(1, change_offset)
+    M.post_process (1, change_offset)
   else
-    M.post_process(0)
+    M.post_process (0)
   end
 
   -- Reenable mappings
   if V.Maps and V.Maps.enable then
-    V.Maps.enable()
+    V.Maps.enable ()
   end
   if V.Maps and V.Maps.map_esc_and_toggle then
-    V.Maps.map_esc_and_toggle()
+    V.Maps.map_esc_and_toggle ()
   end
 
   -- User autocommand after running commands
-  vim.cmd('silent doautocmd <nomodeline> User visual_multi_after_cmd')
+  vim.cmd ("silent doautocmd <nomodeline> User visual_multi_after_cmd")
 end
 
 -- ===========================================================================
@@ -419,23 +425,25 @@ end
 -- ===========================================================================
 M.extra_spaces = {}
 
-function M.extra_spaces.remove(line_offset)
+function M.extra_spaces.remove (line_offset)
   -- Extra spaces at EOL may have been added and must be removed.
   -- Remove the extra space only if it comes after r.b, and it's just before \n
-  for _, i in ipairs(v.extra_spaces) do
+  for _, i in ipairs (v.extra_spaces) do
     -- some region has been removed for some reason (merge, ...)
-    if i >= #R_fn() then break end
+    if i >= #R_fn () then
+      break
+    end
 
-    local l = R_fn()[i + 1].L + (line_offset or 0)
-    local line_text = vim.fn.getline(l)
-    if #line_text > 0 and line_text:sub(-1) == ' ' then
-      vim.fn.setline(l, line_text:sub(1, -2))
+    local l = R_fn ()[i + 1].L + (line_offset or 0)
+    local line_text = vim.fn.getline (l)
+    if #line_text > 0 and line_text:sub (-1) == " " then
+      vim.fn.setline (l, line_text:sub (1, -2))
     end
   end
   v.extra_spaces = {}
 end
 
-function M.extra_spaces.add(r, insert_mode)
+function M.extra_spaces.add (r, insert_mode)
   -- It may be necessary to add spaces over empty lines, or if at EOL.
   -- add space if empty line(>) or eol(=)
   -- optional arg is when called in insert mode (cursors are different)
@@ -448,12 +456,12 @@ function M.extra_spaces.add(r, insert_mode)
     line_num = r.L
   end
 
-  local line_text = vim.fn.getline(line_num)
+  local line_text = vim.fn.getline (line_num)
   -- use vim.fn.strwidth because multibyte chars cause problems at EOL
   -- this will result in more extra spaces than necessary but no big deal
-  if end_pos >= vim.fn.strwidth(line_text) then
-    vim.fn.setline(line_num, line_text .. ' ')
-    table.insert(v.extra_spaces, r.index)
+  if end_pos >= vim.fn.strwidth (line_text) then
+    vim.fn.setline (line_num, line_text .. " ")
+    table.insert (v.extra_spaces, r.index)
   end
 end
 
@@ -463,49 +471,51 @@ end
 
 -- Special handler for x/X normal commands, and <BS>/<Del> insert commands.
 -- Equivalent to s:bs_del(cmd) in VimScript
-function M._bs_del(cmd)
+function M._bs_del (cmd)
   if v.insert == 1 then
     -- Delegate to icmds module if available
     if V.Icmds and V.Icmds.x then
-      return V.Icmds.x(cmd)
+      return V.Icmds.x (cmd)
     end
     -- Fallback: try vim fn
-    if vim.fn['vm#icmds#x'] then
-      return vim.fn['vm#icmds#x'](cmd)
+    if vim.fn["vm#icmds#x"] then
+      return vim.fn["vm#icmds#x"] (cmd)
     end
   else
-    M.process('normal! ' .. cmd)
+    M.process ("normal! " .. cmd)
   end
 
-  if cmd == 'x' then
-    for _, r in ipairs(R_fn()) do
-      if r.a == vim.fn.col({r.L, '$'}) then
-        r:shift(-1, -1)
+  if cmd == "x" then
+    for _, r in ipairs (R_fn ()) do
+      if r.a == vim.fn.col ({ r.L, "$" }) then
+        r:shift (-1, -1)
       end
     end
   end
 
-  Global.merge_regions()
+  Global.merge_regions ()
 end
 
 -- Ensure selections are reselected after some commands.
 -- Equivalent to s:visual_reselect(cmd) in VimScript
-function M._visual_reselect(cmd)
-  local reselect = cmd == '~' or cmd:lower():find('[u]')
-  return X_fn() == 1 and reselect
+function M._visual_reselect (cmd)
+  local reselect = cmd == "~" or cmd:lower ():find ("[u]")
+  return X_fn () == 1 and reselect
 end
 
 -- Fill VM register after deletions/changes at cursors.
 -- Equivalent to fill_register method (from ecmds/vim version)
-function M._fill_register(store_reg, txt, vimreg)
-  if #txt == 0 then return end
+function M._fill_register (store_reg, txt, vimreg)
+  if #txt == 0 then
+    return
+  end
 
-  local reg = store_reg or v.def_reg or '"'
-  local text = table.concat(txt, '\n')
+  local reg = store_reg or v.def_reg or "\""
+  local text = table.concat (txt, "\n")
 
   -- Write to VM register (placeholder - full register handling in registers module)
   if vimreg then
-    vim.fn.setreg(reg, text)
+    vim.fn.setreg (reg, text)
   else
     -- Store in VM internal register
     v._vm_reg = v._vm_reg or {}
