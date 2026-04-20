@@ -41,8 +41,8 @@ function M.set ()
 
   -- Disable conceal
   local comp = require ("visual-multi.comp")
-  vim.bo.conceallevel = comp.conceallevel () and 0 or vim.bo.conceallevel
-  vim.bo.concealcursor = ""
+  vim.wo.conceallevel = comp.conceallevel () and 0 or vim.wo.conceallevel
+  vim.wo.concealcursor = ""
 
   vim.o.virtualedit = "onemore"
   vim.o.whichwrap = "h,l,<,>"
@@ -78,8 +78,8 @@ function M.init ()
   vars.oldmatches = vim.fn.getmatches ()
   vars.clipboard = vim.o.clipboard
   vars.textwidth = vim.bo.textwidth
-  vars.conceallevel = vim.bo.conceallevel
-  vars.concealcursor = vim.bo.concealcursor
+  vars.conceallevel = vim.wo.conceallevel
+  vars.concealcursor = vim.wo.concealcursor
   vars.softtabstop = vim.bo.softtabstop
   vars.statusline = vim.o.statusline
 
@@ -131,8 +131,8 @@ function M.reset ()
   vim.bo.synmaxcol = vars.synmaxcol
   vim.bo.textwidth = vars.textwidth
   vim.bo.softtabstop = vars.softtabstop
-  vim.bo.conceallevel = vars.conceallevel
-  vim.bo.concealcursor = vars.concealcursor
+  vim.wo.conceallevel = vars.conceallevel
+  vim.wo.concealcursor = vars.concealcursor
 
   if vim.g.VM_set_statusline == nil or vim.g.VM_set_statusline == 2 then
     vim.o.statusline = vars.statusline
