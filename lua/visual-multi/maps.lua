@@ -224,23 +224,38 @@ function M._build_buffer_maps ()
   local check_maps = vim.b.VM_check_mappings or vim.g.VM_check_mappings
   local force_maps = vim.b.VM_force_maps or vim.g.VM_force_maps or {}
 
+  -- Ensure Vm.motions etc are initialized
+  local Vm = vim.g.Vm or {}
+  Vm.motions = Vm.motions or {
+    "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", ",", ";",
+    "$", "0", "^", "%", "ge", "gE", "\\|",
+  }
+  Vm.find_motions = Vm.find_motions or { "f", "F", "t", "T" }
+  Vm.tobj_motions = Vm.tobj_motions or {
+    ["{"] = "{", ["}"] = "}", ["("] = "(", [")"] = ")",
+    ["g{"] = "[{", ["g}"] = "]}", ["g)"] = "])", ["g("] = "[(",
+  }
+  Vm.user_ops = Vm.user_ops or {}
+  Vm.select_motions = Vm.select_motions or { "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", "ge", "gE", "BBW" }
+  vim.g.Vm = Vm
+
   -- Generate base buffer maps
   local all = require ("visual-multi.maps.all")
   local maps = all.buffer ()
 
   -- Integrate motions
-  for _, m in ipairs (vim.g.Vm.motions) do
+  for _, m in ipairs (Vm.motions) do
     maps["Motion " .. m] = { m, "n" }
   end
-  for _, m in ipairs (vim.g.Vm.find_motions) do
+  for _, m in ipairs (Vm.find_motions) do
     maps["Motion " .. m] = { m, "n" }
   end
-  for m, val in pairs (vim.g.Vm.tobj_motions) do
+  for m, val in pairs (Vm.tobj_motions) do
     maps["Motion " .. val] = { m, "n" }
   end
 
   -- Integrate user operators
-  for op, _ in pairs (vim.g.Vm.user_ops) do
+  for op, _ in pairs (Vm.user_ops) do
     -- Don't map operator if it starts with key that would interfere
     if vim.fn.index ({ "y", "c", "d" }, op:sub (1, 1)) == -1 then
       maps["User Operator " .. op] = { op, "n" }

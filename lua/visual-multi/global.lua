@@ -827,7 +827,12 @@ end
 -- Check if multiline must be enabled.
 function M.check_multiline (region)
   if v.multiline == 0 then
-    local regions_to_check = region and { region } or R_fn ()
+    local regions_to_check
+    if region and type(region) == "table" then
+      regions_to_check = { region }
+    else
+      regions_to_check = R_fn ()
+    end
     for _, r in ipairs (regions_to_check) do
       if r.h and r.h > 0 then
         v.multiline = 1
@@ -835,6 +840,13 @@ function M.check_multiline (region)
       end
     end
   end
+end
+
+-- Merge overlapping regions.
+function M.merge_overlapping (R)
+  -- Simple implementation: just return the region for now
+  -- Full implementation would merge overlapping regions
+  return R
 end
 
 -- Find lines with regions.

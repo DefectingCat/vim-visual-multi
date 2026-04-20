@@ -12,15 +12,24 @@ local funcs -- state.Funcs
 
 -- Lambda equivalent: check if in extend mode
 local function is_extend_mode ()
-  return state and state.vars.extend_mode == 1
+  return vars and vars.extend_mode == 1
 end
 
 function M.init ()
-  state = require ("visual-multi.state").get ()
+  -- Use vim.b.VM_Selection if available, otherwise fall back to state module
+  local VM = vim.b.VM_Selection
+  if VM then
+    state = VM
+    vars = VM.Vars
+    regions = VM.Regions
+    funcs = VM.Funcs
+  else
+    state = require ("visual-multi.state").get ()
+    vars = state.vars
+    regions = state.regions
+    funcs = state.Funcs
+  end
   config = require ("visual-multi.config")
-  vars = state.vars
-  regions = state.regions
-  funcs = state.Funcs
 end
 
 -- Fix positions at end of line.

@@ -136,12 +136,15 @@ function M.init_buffer (cmd_type)
     Variables = require ("visual-multi.variables")
     Region = require ("visual-multi.region")
 
-    -- Create buffer state
-    vim.b.VM_Selection = {
+    -- Create buffer state (local first, then assign to vim.b at the end)
+    V = {
       Vars = {},
       Regions = {},
       Bytes = {},
     }
+    v = V.Vars
+
+    -- Mark buffer as active
     vim.b.visual_multi = 1
 
     -- Initialize debug and backup
@@ -151,10 +154,6 @@ function M.init_buffer (cmd_type)
       last = 0,
       first = vim.fn.undotree ().seq_cur,
     }
-
-    -- Set local references
-    V = vim.b.VM_Selection
-    v = V.Vars
 
     -- Funcs module must be initialized first
     V.Funcs = Funcs.init ()
@@ -175,6 +174,9 @@ function M.init_buffer (cmd_type)
     if cmd_type ~= 0 then
       vim.fn.setreg ("/", "")
     end
+
+    -- Set vim.b.VM_Selection early so Comp.init() can access it
+    vim.b.VM_Selection = V
 
     -- Hooks and compatibility tweaks before applying mappings
     Comp.init ()
@@ -257,6 +259,9 @@ function M.init_buffer (cmd_type)
 
     -- Store buffer number in global state
     vim.g.Vm.buffer = vim.fn.bufnr ("")
+
+    -- Finally, assign the local state to vim.b
+    vim.b.VM_Selection = V
 
     return V
   end)
@@ -483,8 +488,10 @@ local function set_reg ()
 
   if v.yanked then
     v.yanked = 0
-    vim.g.Vm.registers = vim.g.Vm.registers or {}
-    vim.g.Vm.registers["\""] = {}
+    local Vm = vim.g.Vm or {}
+    Vm.registers = Vm.registers or {}
+    Vm.registers['"'] = {}
+    vim.g.Vm = Vm
     if V.Funcs and V.Funcs.get_reg then
       v.oldreg = V.Funcs.get_reg (vim.v.register)
     end

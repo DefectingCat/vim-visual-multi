@@ -51,7 +51,7 @@ end
 -- Returns: 1 if VM was already active
 -- ===========================================================================
 
-local function s_init (whole, type, extend_mode)
+local function s_init (whole, init_type, extend_mode)
   if extend_mode then
     vim.g.Vm.extend_mode = 1
   end
@@ -63,9 +63,10 @@ local function s_init (whole, type, extend_mode)
     v.whole_word = whole
     return 1 -- already initialized
   else
-    local error = vim.fn["vm#init_buffer"] (type)
-    if type (error) == "string" then
-      error (error)
+    local VM = require ("visual-multi.vm")
+    local result = VM.init_buffer (init_type)
+    if type (result) == "string" then
+      error (result)
     end
     v.whole_word = whole
     return 0
@@ -304,7 +305,8 @@ function M.ctrln (count)
   if X_fn () == 0 and is_r () then
     local pos_data = vim.fn.getpos (".")
     local pos = { pos_data[2], pos_data[3] }
-    vim.fn["vm#operators#select"] (1, "iw")
+    local Operators = require ("visual-multi.operators")
+    Operators.select (1, "iw")
     Global.update_and_select_region (pos)
   else
     for i = 1, count do
