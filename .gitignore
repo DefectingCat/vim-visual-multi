@@ -7,3 +7,4 @@ generated_output_file.txt
 test.log
 __pycache__
 test/.python-version
+.omc/
