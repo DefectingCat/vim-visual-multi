@@ -225,7 +225,10 @@ function M.buffer ()
       key = op
       val = 0
     end
-    vim.g.Vm.user_ops[key] = val
+    local Vm = vim.g.Vm
+    if Vm and Vm.user_ops then
+      Vm.user_ops[key] = val
+    end
     vim.cmd (
       "nnoremap <silent> <Plug>(VM-User-Operator-"
         .. key

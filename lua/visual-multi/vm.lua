@@ -70,7 +70,7 @@ local function init_startup ()
   init_global_vars ()
 
   -- Initialize themes
-  Themes = require ("visual-multi/themes")
+  Themes = require ("visual-multi.themes")
   Themes.init ()
 
   -- Initialize permanent plugs/mappings
@@ -344,7 +344,7 @@ function M.reset (silent)
   -- Reenable folding, but keep winline and open current fold
   if v.oldfold then
     if V.Funcs and V.Funcs.Scroll then
-      V.Funcs.Scroll.get (1)
+      V.Funcs.Scroll.get ()
       vim.cmd ("normal! zizv")
       V.Funcs.Scroll.restore ()
     end

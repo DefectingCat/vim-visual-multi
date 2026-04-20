@@ -359,7 +359,9 @@ function M.find_all (visual, whole)
     if not R or vim.tbl_isempty (R) then
       R = M.find_under (0, whole)
     end
-    Search.update_patterns (R.pat)
+    if R and R.pat then
+      Search.update_patterns (R.pat)
+    end
   else
     M.find_under (1, whole)
   end
