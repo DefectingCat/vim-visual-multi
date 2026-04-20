@@ -1,0 +1,27 @@
+# stylua.toml
+# StyLua configuration for visual-multi Lua code
+
+# Column width limit for line wrapping
+column_width = 100
+
+# Use 2 spaces for indentation (Lua convention)
+indent_type = "Spaces"
+indent_width = 2
+
+# Use double quotes for strings
+quote_style = "ForceDouble"
+
+# Collapse simple statements to single line
+collapse_simple_statement = "Never"
+
+# Call parentheses configuration
+call_parentheses = "Always"
+
+# Space after function keywords
+space_after_function_names = "Always"
+
+# Sort requires (disabled for stability)
+sort_requires = { enabled = false }
+
+# Use LuaJIT syntax (Neovim compatible)
+syntax = "LuaJIT"
