@@ -387,7 +387,7 @@ function M.reset(silent)
   vim.b.visual_multi = nil
 
   -- Garbage collect
-  vim.cmd('call garbagecollect()')
+  collectgarbage()
 
   return {}
 end
