@@ -177,8 +177,9 @@ function M.convert(type)
   if X_fn() == 0 then
     -- Call vm#operators#select equivalent
     -- This selects the word under cursor for each region
-    if V.Operators and V.Operators.select then
-      V.Operators.select(1, 'iw')
+    local ok, operators = pcall(require, 'visual-multi.operators')
+    if ok and operators.select then
+      operators.select(1, 'iw')
     end
   end
 
