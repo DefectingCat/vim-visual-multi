@@ -12,26 +12,35 @@ function M.setup ()
     return
   end
 
-  -- Prevent double loading
-  if vim.g.loaded_visual_multi then
+  -- Prevent double loading (but allow explicit setup call)
+  local was_loaded = vim.g.loaded_visual_multi
+  if was_loaded then
+    -- Already loaded via plugin/visual-multi.vim, but still run mappings
+    local ok_maps, maps = pcall (require, "visual-multi.maps")
+    if ok_maps and maps.default then
+      maps.default ()
+    end
+    M.define_commands ()
     return
   end
   vim.g.loaded_visual_multi = 1
 
-  -- Initialize global Vm state
-  vim.g.Vm = vim.g.Vm
-    or {
-      hi = {},
-      buffer = 0,
-      extend_mode = 0,
-      finding = 0,
-      mappings_enabled = 0,
-      last_ex = "",
-      last_normal = "",
-      last_visual = "",
-      registers = { ["\""] = {}, ["-"] = {} },
-      oldupdate = vim.fn.exists ("##TextYankPost") == 1 and 0 or vim.o.updatetime,
-    }
+  -- Initialize global Vm state (must be done before maps.default())
+  local Vm = {
+    hi = {},
+    buffer = 0,
+    extend_mode = 0,
+    finding = 0,
+    mappings_enabled = 0,
+    last_ex = "",
+    last_normal = "",
+    last_visual = "",
+    registers = { ['"'] = {}, ["-"] = {} },
+    oldupdate = vim.fn.exists ("##TextYankPost") == 1 and 0 or vim.o.updatetime,
+    maps = { permanent = {} },
+    unmaps = {},
+  }
+  vim.g.Vm = Vm
 
   -- Set default for highlight matches
   vim.g.VM_highlight_matches = vim.g.VM_highlight_matches or "underline"
@@ -49,20 +58,9 @@ function M.setup ()
   ]])
 
   -- Initialize global mappings
-  -- Note: permanent() uses <SID> mappings which require VimScript context
-  -- These are set up by plugin/visual-multi.vim for Vim8 compatibility
-  -- For Neovim, the mappings are set up via the VimScript bridge or
-  -- can be called from init.vim / config
-  -- local ok_plugs, plugs = pcall(require, 'visual-multi.plugs')
-  -- if ok_plugs and plugs.permanent then
-  --   plugs.permanent()
-  -- end
-
   local ok_maps, maps = pcall (require, "visual-multi.maps")
   if ok_maps and maps.default then
-    pcall (function ()
-      maps.default ()
-    end)
+    maps.default ()
   end
 
   -- Setup autocommands for register persistence
@@ -146,7 +144,9 @@ function M.vm_registers ()
   if vim.g.VM_PERSIST and not vim.g.VM_persistent_registers then
     vim.g.VM_PERSIST = nil
   elseif vim.g.VM_PERSIST then
-    vim.g.Vm.registers = vim.deepcopy (vim.g.VM_PERSIST)
+    local Vm = vim.g.Vm or {}
+    Vm.registers = vim.deepcopy (vim.g.VM_PERSIST)
+    vim.g.Vm = Vm
   end
 end
 
@@ -154,7 +154,8 @@ function M.vm_persist ()
   if vim.g.VM_PERSIST and not vim.g.VM_persistent_registers then
     vim.g.VM_PERSIST = nil
   elseif vim.g.VM_persistent_registers then
-    vim.g.VM_PERSIST = vim.deepcopy (vim.g.Vm.registers)
+    local Vm = vim.g.Vm or {}
+    vim.g.VM_PERSIST = vim.deepcopy (Vm.registers)
   end
 end
 
@@ -165,7 +166,8 @@ function M.infos ()
   end
 
   local VM = vim.b.VM_Selection
-  local m = vim.g.Vm.mappings_enabled and "M" or "m"
+  local Vm = vim.g.Vm or {}
+  local m = Vm.mappings_enabled and "M" or "m"
   local s = VM.Vars.single_region and "S" or "s"
   local l = VM.Vars.multiline and "V" or "v"
 

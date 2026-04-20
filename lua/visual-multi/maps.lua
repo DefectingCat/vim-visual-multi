@@ -42,10 +42,19 @@ function M.init ()
 end
 
 function M.default ()
+  -- Define <Plug> mappings first
+  local Plugs = require ("visual-multi.plugs")
+  Plugs.permanent ()
+
   -- At vim start, permanent mappings are generated and applied
   M._build_permanent_maps ()
-  for _, m in ipairs (vim.g.Vm.maps.permanent) do
-    vim.fn.execute (m)
+
+  -- Get Vm (vim.g returns a copy)
+  local Vm = vim.g.Vm or {}
+  if Vm.maps and Vm.maps.permanent then
+    for _, m in ipairs (Vm.maps.permanent) do
+      vim.fn.execute (m)
+    end
   end
 end
 
@@ -159,18 +168,25 @@ end
 function M._build_permanent_maps ()
   -- Run at vim start. Generate permanent mappings and integrate custom ones.
 
+  -- Get current Vm state (vim.g returns a copy)
+  local Vm = vim.g.Vm or {}
+
   -- Set default VM leader
   local ldr = vim.g.VM_leader or "\\"
-  vim.g.Vm.leader = type (ldr) == "string" and { default = ldr, visual = ldr, buffer = ldr }
+  Vm.leader = type (ldr) == "string" and { default = ldr, visual = ldr, buffer = ldr }
     or vim.tbl_extend ("keep", ldr, { default = "\\", visual = "\\", buffer = "\\" })
 
   -- Init vars and generate base permanent maps
   vim.g.VM_maps = vim.g.VM_maps or {}
-  vim.g.Vm.maps = { permanent = {} }
-  vim.g.Vm.unmaps = {}
+  Vm.maps = { permanent = {} }
+  Vm.unmaps = {}
+
+  -- Save Vm back to vim.g
+  vim.g.Vm = Vm
 
   -- Get permanent maps from all#permanent module
-  local maps = vim.fn["vm#maps#all#permanent"] ()
+  local all = require ("visual-multi.maps.all")
+  local maps = all.permanent ()
 
   -- Integrate custom maps
   for key, _ in pairs (vim.g.VM_maps) do
@@ -183,19 +199,22 @@ function M._build_permanent_maps ()
   for key, val in pairs (maps) do
     local mapping = M._assign (key, val, false)
     if mapping ~= "" then
-      table.insert (vim.g.Vm.maps.permanent, mapping)
+      table.insert (Vm.maps.permanent, mapping)
     end
   end
 
   -- Generate list of 'exe' commands for unmappings
   for key, val in pairs (maps) do
-    table.insert (vim.g.Vm.unmaps, M._unmap (val, false))
+    table.insert (Vm.unmaps, M._unmap (val, false))
   end
 
   -- Store some mappings that need special handling
-  vim.g.Vm.maps.toggle = vim.g.VM_maps["Toggle Mappings"] or (vim.g.Vm.leader.buffer .. "<Space>")
-  vim.g.Vm.maps.exit = vim.g.VM_maps["Exit"] or "<Esc>"
-  vim.g.Vm.maps.surround = vim.g.VM_maps["Surround"] or "S"
+  Vm.maps.toggle = vim.g.VM_maps["Toggle Mappings"] or (Vm.leader.buffer .. "<Space>")
+  Vm.maps.exit = vim.g.VM_maps["Exit"] or "<Esc>"
+  Vm.maps.surround = vim.g.VM_maps["Surround"] or "S"
+
+  -- Save Vm back to vim.g
+  vim.g.Vm = Vm
 end
 
 function M._build_buffer_maps ()
@@ -206,7 +225,8 @@ function M._build_buffer_maps ()
   local force_maps = vim.b.VM_force_maps or vim.g.VM_force_maps or {}
 
   -- Generate base buffer maps
-  local maps = vim.fn["vm#maps#all#buffer"] ()
+  local all = require ("visual-multi.maps.all")
+  local maps = all.buffer ()
 
   -- Integrate motions
   for _, m in ipairs (vim.g.Vm.motions) do

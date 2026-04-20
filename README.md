@@ -1,5 +1,7 @@
 ## vim-visual-multi
 
+A Neovim plugin for simultaneous multi-cursor editing, written in Lua.
+
 It's called ___vim-visual-multi___ in analogy with _visual-block_, but the plugin works mostly from normal mode.
 
 Basic usage:
@@ -31,13 +33,26 @@ And more... of course, you can enter insert mode and autocomplete will work.
 
 ### Installation
 
+**Requirements:** Neovim 0.5+
+
+With lazy.nvim:
+
+```lua
+{
+  'mg979/vim-visual-multi',
+  branch = 'master',
+}
+```
+
 With vim-plug:
 
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
-    
-With Vim 8+:
 
-    mkdir -p ~/.vim/pack/plugins/start && git clone https://github.com/mg979/vim-visual-multi ~/.vim/pack/plugins/start/vim-visual-multi
+With packer.nvim:
+
+```lua
+use { 'mg979/vim-visual-multi', branch = 'master' }
+```
 
 
 ### Documentation
@@ -52,7 +67,7 @@ For some specific topic it's often:
 
 To run the tutorial:
 
-    vim -Nu path/to/visual-multi/tutorialrc
+    nvim -u path/to/visual-multi/tutorialrc
 
 
 ### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)

@@ -10,57 +10,22 @@ M.loaded = false
 function M.setup (opts)
   opts = opts or {}
 
-  -- Load configuration
-  local config = require ("visual-multi.config")
-  config.setup (opts)
-
-  -- Initialize global state for extend_mode tracking
-  vim.g.Vm = vim.g.Vm or {}
-  vim.g.Vm.extend_mode = vim.g.Vm.extend_mode or 0
-
-  -- Register commands (placeholder for Phase 4)
-  -- VMTheme, VMDebug, VMClear, VMLive, VMRegisters, VMSearch
+  -- Delegate to plugin module
+  local plugin = require ("visual-multi.plugin")
+  plugin.setup (opts)
 
   M.loaded = true
   return M
 end
 
 function M.init_buffer (cmd_type)
-  cmd_type = cmd_type or 0
-
-  local state = require ("visual-multi.state")
-  local config = require ("visual-multi.config")
-  local region = require ("visual-multi.region")
-  local global = require ("visual-multi.global")
-  local funcs = require ("visual-multi.funcs")
-  local bufnr = vim.api.nvim_get_current_buf ()
-
-  -- Create buffer state
-  local s = state.create (bufnr)
-
-  -- Initialize modules with buffer state
-  region.init ()
-  global.init ()
-  funcs.init ()
-
-  -- Store module references in state
-  s.Funcs = funcs
-  s.Global = global
-  s.Region = region
-
-  -- Register autocmds for state sync
-  state.register_autocmds (bufnr)
-
-  -- Mark buffer as active
-  vim.b.visual_multi_active = true
-
-  return s
+  local vm = require ("visual-multi.vm")
+  return vm.init_buffer (cmd_type)
 end
 
 function M.reset ()
-  local state = require ("visual-multi.state")
-  local bufnr = vim.api.nvim_get_current_buf ()
-  state.destroy (bufnr)
+  local vm = require ("visual-multi.vm")
+  return vm.reset ()
 end
 
 function M.is_active ()
