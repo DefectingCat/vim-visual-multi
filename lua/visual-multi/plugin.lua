@@ -168,14 +168,14 @@ function M.infos ()
   local VM = vim.b.VM_Selection
   local Vm = vim.g.Vm or {}
   local m = Vm.mappings_enabled and "M" or "m"
-  local s = VM.Vars.single_region and "S" or "s"
-  local l = VM.Vars.multiline and "V" or "v"
+  local s = VM.vars.single_region and "S" or "s"
+  local l = VM.vars.multiline and "V" or "v"
 
   return {
-    current = VM.Vars.index + 1,
-    total = #VM.Regions,
-    ratio = string.format ("%d / %d", VM.Vars.index + 1, #VM.Regions),
-    patterns = VM.Vars.search,
+    current = VM.vars.index + 1,
+    total = #VM.regions,
+    ratio = string.format ("%d / %d", VM.vars.index + 1, #VM.regions),
+    patterns = VM.vars.search,
     status = m .. s .. l,
   }
 end

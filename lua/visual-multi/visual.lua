@@ -19,7 +19,7 @@ local R_fn -- returns V.regions
 local X_fn -- returns g:Vm.extend_mode
 
 -- Temporary storage for visual operations
-local Bytes -- backup of V.Bytes for merge
+local Bytes -- backup of V.bytes for merge
 
 function M.init ()
   State = require ("visual-multi.state")
@@ -235,7 +235,7 @@ function M._backup_map ()
   -- Use temporary regions, they will be merged later
   M.init ()
   local X = Global.extend_mode ()
-  Bytes = vim.deepcopy (V.Bytes)
+  Bytes = vim.deepcopy (V.bytes)
   Global.erase_regions ()
   v.no_search = 1
   v.eco = 1
@@ -244,15 +244,15 @@ end
 
 -- Merge regions
 function M._visual_merge ()
-  local new_map = vim.deepcopy (V.Bytes)
-  V.Bytes = Bytes
+  local new_map = vim.deepcopy (V.bytes)
+  V.bytes = Bytes
   Global.merge_maps (new_map)
 end
 
 -- Subtract regions
 function M._visual_subtract ()
-  local new_map = vim.deepcopy (V.Bytes)
-  V.Bytes = Bytes
+  local new_map = vim.deepcopy (V.bytes)
+  V.bytes = Bytes
   Global.subtract_maps (new_map)
 end
 

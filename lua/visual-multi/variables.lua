@@ -14,7 +14,7 @@ local v
 
 function M.set ()
   local F = V.Funcs
-  local vars = V.Vars
+  local vars = V.vars
 
   -- Disable folding, but keep winline
   if vim.o.foldenable then
@@ -56,7 +56,7 @@ end
 
 function M.init ()
   local F = V.Funcs
-  local vars = V.Vars
+  local vars = V.vars
 
   -- Init search
   vars.def_reg = F.default_reg ()
@@ -112,7 +112,7 @@ function M.init ()
 end
 
 function M.reset ()
-  local vars = V.Vars
+  local vars = V.vars
 
   if not vars.oldhls then
     vim.o.hlsearch = false
@@ -152,7 +152,7 @@ end
 -- Initialize module with state
 function M.init_state (state)
   V = state
-  v = V.Vars
+  v = V.vars
 end
 
 return M

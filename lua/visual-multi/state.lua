@@ -16,8 +16,18 @@ M.sync_fields = {
 
 function M.get (bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf ()
+
+  -- 使用本地缓存作为唯一状态源
   if not M.buffer_state[bufnr] then
-    return M.create (bufnr)
+    -- 检查 vim.b.VM_Selection 是否存在（由 vm.lua 创建）
+    local vm_selection = vim.b[bufnr].VM_Selection
+    if vm_selection and vm_selection.vars and vm_selection.regions then
+      -- 使用 vm.lua 创建的状态
+      M.buffer_state[bufnr] = vm_selection
+    else
+      -- 创建新状态
+      return M.create (bufnr)
+    end
   end
   return M.buffer_state[bufnr]
 end
@@ -38,7 +48,7 @@ function M.create (bufnr)
       direction = 1,
       single_region = 0,
       multiline = 0,
-      search = "",
+      search = {},
       pattern = "",
       oldreg = "",
       dot = "",

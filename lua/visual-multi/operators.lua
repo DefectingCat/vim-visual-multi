@@ -20,7 +20,7 @@ local single_fn -- single character motion check
 local double_fn -- double character motion check
 
 -- Temporary storage for find operation
-local Bytes -- backup of V.Bytes for merge
+local Bytes -- backup of V.bytes for merge
 
 function M.init ()
   State = require ("visual-multi.state")
@@ -291,17 +291,17 @@ end
 function M._backup_map_find ()
   -- Use temporary regions, they will be merged later
   init_operator ()
-  Bytes = vim.deepcopy (V.Bytes)
+  Bytes = vim.deepcopy (V.bytes)
   V.regions = {}
-  V.Bytes = {}
+  V.bytes = {}
   v.index = -1
   v.no_search = 1
   v.eco = 1
 end
 
 function M._merge_find ()
-  local new_map = vim.deepcopy (V.Bytes)
-  V.Bytes = Bytes
+  local new_map = vim.deepcopy (V.bytes)
+  V.bytes = Bytes
   Global.merge_maps (new_map)
 end
 

@@ -51,8 +51,8 @@ local V
 local v
 
 function M.init ()
-  V = vim.b.VM_Selection
-  v = V.Vars
+  V = require ("visual-multi.state").get ()
+  v = V.vars
   v.disabled_plugins = {}
 
   vim.cmd ("silent! call VM_Start()")

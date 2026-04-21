@@ -27,7 +27,7 @@ end
 
 -- Helper: get VM buffer state
 local function get_VM ()
-  return vim.b.VM_Selection
+  return require ("visual-multi.state").get ()
 end
 
 -- Helper: call VM module method
@@ -353,8 +353,8 @@ function M.buffer ()
   vim.keymap.set ("n", "<Plug>(VM-Exit)", function ()
     local noh = ""
     local VM = get_VM ()
-    if VM and VM.Vars then
-      noh = VM.Vars.noh or ""
+    if VM and VM.vars then
+      noh = VM.vars.noh or ""
     end
     VM.reset ()
   end, { silent = true })

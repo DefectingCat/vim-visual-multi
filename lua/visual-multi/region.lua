@@ -16,19 +16,11 @@ local function is_extend_mode ()
 end
 
 function M.init ()
-  -- Use vim.b.VM_Selection if available, otherwise fall back to state module
-  local VM = vim.b.VM_Selection
-  if VM then
-    state = VM
-    vars = VM.Vars
-    regions = VM.Regions
-    funcs = VM.Funcs
-  else
-    state = require ("visual-multi.state").get ()
-    vars = state.vars
-    regions = state.regions
-    funcs = state.Funcs
-  end
+  -- Always use State.get() to get the correct reference
+  state = require ("visual-multi.state").get ()
+  vars = state.vars
+  regions = state.regions
+  funcs = state.Funcs
   config = require ("visual-multi.config")
 end
 

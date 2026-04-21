@@ -120,7 +120,7 @@ function M.init_buffer (cmd_type)
   local ok, err = pcall (function ()
     -- If already initialized, return current instance
     if vim.b.visual_multi then
-      return vim.b.VM_Selection
+      return State.get ()
     end
 
     -- Load modules
@@ -136,13 +136,10 @@ function M.init_buffer (cmd_type)
     Variables = require ("visual-multi.variables")
     Region = require ("visual-multi.region")
 
-    -- Create buffer state (local first, then assign to vim.b at the end)
-    V = {
-      Vars = {},
-      Regions = {},
-      Bytes = {},
-    }
-    v = V.Vars
+    -- Create buffer state using State module
+    -- This ensures all modules share the same state reference
+    V = State.create ()
+    v = V.vars
 
     -- Mark buffer as active
     vim.b.visual_multi = 1
@@ -289,11 +286,11 @@ function M.reset (silent)
   end
 
   -- Ensure we have valid state
-  V = vim.b.VM_Selection
+  V = State.get ()
   if not V then
     return {}
   end
-  v = V.Vars
+  v = V.vars
 
   -- Load modules
   Variables = Variables or require ("visual-multi.variables")
@@ -438,8 +435,8 @@ local function buffer_leave ()
   if vim.b.VM_skip_reset_once_on_bufleave then
     vim.b.VM_skip_reset_once_on_bufleave = nil
   else
-    local selection = vim.b.VM_Selection or {}
-    local vars = selection.Vars or {}
+    local selection = State.get ()
+    local vars = selection.vars or {}
     if not vim.tbl_isempty (selection) and (vars.insert or 0) == 0 then
       M.reset (true)
     end
@@ -447,18 +444,18 @@ local function buffer_leave ()
 end
 
 local function buffer_enter ()
-  local selection = vim.b.VM_Selection
+  local selection = State.get ()
   if not selection or vim.tbl_isempty (selection) then
-    vim.b.VM_Selection = {}
+    -- State is already managed by State module
   end
 end
 
 local function cursor_moved ()
-  V = vim.b.VM_Selection
+  V = State.get ()
   if not V then
     return
   end
-  v = V.Vars
+  v = V.vars
   if not v then
     return
   end
@@ -477,11 +474,11 @@ end
 
 local function set_reg ()
   -- Replace old default register if yanking in VM outside a region or cursor
-  V = vim.b.VM_Selection
+  V = State.get ()
   if not V then
     return
   end
-  v = V.Vars
+  v = V.vars
   if not v then
     return
   end
@@ -579,7 +576,7 @@ function M.au_cursor (end_)
     buffer = 0,
     callback = function ()
       cursor_moved ()
-      V = vim.b.VM_Selection
+      V = State.get ()
       if V and V.Funcs and V.Funcs.set_statusline then
         V.Funcs.set_statusline (2)
       end
@@ -590,7 +587,7 @@ function M.au_cursor (end_)
     group = group,
     buffer = 0,
     callback = function ()
-      V = vim.b.VM_Selection
+      V = State.get ()
       if V and V.Funcs and V.Funcs.set_statusline then
         V.Funcs.set_statusline (1)
       end
