@@ -119,7 +119,7 @@ function M.init_buffer (cmd_type)
 
   local ok, err = pcall (function ()
     -- If already initialized, return current instance
-    if vim.b.visual_multi then
+    if vim.b.visual_multi and vim.b.visual_multi ~= 0 then
       return State.get ()
     end
 
@@ -136,9 +136,10 @@ function M.init_buffer (cmd_type)
     Variables = require ("visual-multi.variables")
     Region = require ("visual-multi.region")
 
-    -- Create buffer state using State module
-    -- This ensures all modules share the same state reference
-    V = State.create ()
+    -- Get or create buffer state using State module
+    -- Use get() instead of create() to reuse existing state if already created
+    -- (e.g., by Commands.init() or another module calling State.get())
+    V = State.get ()
     v = V.vars
 
     -- Mark buffer as active
@@ -184,6 +185,12 @@ function M.init_buffer (cmd_type)
     V.Search = Search.init ()
     V.Edit = Edit.init ()
     V.Insert = Insert.init ()
+
+    -- Initialize buffer-local <Plug> mappings
+    local ok_plugs, Plugs = pcall (require, "visual-multi.plugs")
+    if ok_plugs and Plugs.buffer then
+      Plugs.buffer ()
+    end
 
     -- Case module (from special/case)
     local ok_case, Case = pcall (require, "visual-multi.case")
@@ -234,7 +241,9 @@ function M.init_buffer (cmd_type)
         Themes.search_highlight ()
       end
       vim.cmd ("hi clear Search")
-      vim.cmd ("hi! " .. vim.g.Vm.Search)
+      if vim.g.Vm.Search then
+        vim.cmd ("hi! " .. vim.g.Vm.Search)
+      end
     end
 
     -- Enable hlsearch if needed
@@ -281,7 +290,7 @@ end
 function M.reset (silent)
   silent = silent or false
 
-  if not vim.b.visual_multi then
+  if not vim.b.visual_multi or vim.b.visual_multi == 0 then
     return {}
   end
 
@@ -344,7 +353,7 @@ function M.reset (silent)
   M.au_cursor (true)
 
   -- Reenable folding, but keep winline and open current fold
-  if v.oldfold then
+  if v.oldfold == 1 then
     if V.Funcs and V.Funcs.Scroll then
       V.Funcs.Scroll.get ()
       vim.cmd ("normal! zizv")
@@ -483,7 +492,7 @@ local function set_reg ()
     return
   end
 
-  if v.yanked then
+  if v.yanked == 1 then
     v.yanked = 0
     local Vm = vim.g.Vm or {}
     Vm.registers = Vm.registers or {}

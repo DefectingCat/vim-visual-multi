@@ -189,7 +189,7 @@ function M._build_permanent_maps ()
   local maps = all.permanent ()
 
   -- Integrate custom maps
-  for key, _ in pairs (vim.g.VM_maps) do
+  for key, _ in pairs (vim.g.VM_maps or {}) do
     if maps[key] then
       maps[key][1] = vim.g.VM_maps[key]
     end
@@ -221,6 +221,7 @@ function M._build_buffer_maps ()
   -- Run once per buffer. Generate buffer mappings and integrate custom ones.
   vim.b.VM_maps = {}
   vim.b.VM_unmaps = {}
+  vim.b.VM_Debug = vim.b.VM_Debug or { lines = {} }
   local check_maps = vim.b.VM_check_mappings or vim.g.VM_check_mappings
   local force_maps = vim.b.VM_force_maps or vim.g.VM_force_maps or {}
 
@@ -303,7 +304,7 @@ function M._build_buffer_maps ()
   end
 
   -- Integrate custom remappings
-  for key, _ in pairs (vim.g.VM_maps) do
+  for key, _ in pairs (vim.g.VM_maps or {}) do
     if maps[key] then
       maps[key][1] = vim.g.VM_maps[key]
     end

@@ -356,7 +356,7 @@ function M.buffer ()
     if VM and VM.vars then
       noh = VM.vars.noh or ""
     end
-    VM.reset ()
+    require ("visual-multi.vm").reset ()
   end, { silent = true })
 
   vim.keymap.set ("n", "<Plug>(VM-Undo)", function ()
@@ -744,16 +744,19 @@ function M.buffer ()
 
   -- Cmdline
   vim.keymap.set ("n", "<Plug>(VM-:)", function ()
-    return Commands.regex_reset (":")
-  end, { expr = true })
+    Commands.regex_reset (":")
+    return ":"
+  end, { expr = true, noremap = true })
 
   vim.keymap.set ("n", "<Plug>(VM-/)", function ()
-    return Commands.regex_reset ("/")
-  end, { expr = true })
+    Commands.regex_reset ("/")
+    return "/"
+  end, { expr = true, noremap = true })
 
   vim.keymap.set ("n", "<Plug>(VM-?)", function ()
-    return Commands.regex_reset ("?")
-  end, { expr = true })
+    Commands.regex_reset ("?")
+    return "?"
+  end, { expr = true, noremap = true })
 end
 
 return M

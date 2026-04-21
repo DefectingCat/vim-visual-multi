@@ -490,7 +490,7 @@ end
 
 -- Search pattern in range
 function M.search (bang, l1, l2, pattern)
-  local just_started = not vim.b.visual_multi
+  local just_started = not vim.b.visual_multi or vim.b.visual_multi == 0
   local pat = pattern ~= "" and pattern or vim.fn.getreg ("/")
   local pos = { vim.fn.getcurpos ()[2], vim.fn.getcurpos ()[3] }
   local view = vim.fn.winsaveview ()
@@ -553,7 +553,7 @@ end
 function M.live ()
   vim.g.VM_live_editing = vim.g.VM_live_editing == nil and false or not vim.g.VM_live_editing
   local active = vim.g.VM_live_editing and "active" or "inactive"
-  print ("[VM] live editing is " .. active)
+  Funcs.msg ("live editing is " .. active)
 end
 
 -- Set up temporary buffer options

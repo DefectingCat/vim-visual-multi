@@ -96,17 +96,17 @@ function M.complete (A, L, P)
 end
 
 function M.statusline ()
-  if not vim.b.visual_multi then
+  if not vim.b.visual_multi or vim.b.visual_multi == 0 then
     return ""
   end
   local v = vim.b.VM_Selection.Vars
   local vm = vim.fn.VMInfos ()
   local color = "%#VM_Extend#"
-  local single = vim.b.VM_Selection.Vars.single_region and "%#VM_Mono# SINGLE " or ""
+  local single = (vim.b.VM_Selection.Vars.single_region == 1) and "%#VM_Mono# SINGLE " or ""
   local mode
 
   local ok, result = pcall (function ()
-    if v.insert then
+    if v.insert == 1 then
       if vim.b.VM_Selection.Insert.replace then
         mode = "V-R"
         color = "%#VM_Mono#"
