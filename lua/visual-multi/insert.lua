@@ -59,7 +59,9 @@ end
 function Cursor:update (ln, change)
   local C = self
   C._a = C.a + change
-  vim.fn.matchdelete (C.hl)
+  if C.hl and C.hl > 0 then
+    pcall (vim.fn.matchdelete, C.hl)
+  end
   C.hl = vim.fn.matchaddpos ("MultiCursor", { { C.l, C._a } }, 40)
 end
 
@@ -344,7 +346,9 @@ end
 -- Clear cursors highlight
 function M:clear_hi ()
   for _, c in ipairs (self.cursors) do
-    vim.fn.matchdelete (c.hl)
+    if c.hl and c.hl > 0 then
+      pcall (vim.fn.matchdelete, c.hl)
+    end
   end
 end
 

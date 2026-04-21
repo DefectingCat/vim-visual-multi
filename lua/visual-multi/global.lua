@@ -243,7 +243,7 @@ function M.clear_matches ()
   local matches = vim.fn.getmatches ()
   for _, m in ipairs (matches) do
     if m.id and m.id > 0 then
-      vim.fn.matchdelete (m.id)
+      pcall (vim.fn.matchdelete, m.id)
     end
   end
 end
@@ -327,6 +327,10 @@ end
 -- @param pos optional: can be a string mark ('.', '[', etc.),
 --   a [ln, col] table, a byte offset number, or nil for cursor position
 function M.region_at_pos (pos)
+  -- Ensure Offset is initialized (lazy init if Global.init hasn't run yet)
+  if not Offset then
+    Offset = require ("visual-multi.offset")
+  end
   local byte_pos
 
   if pos == nil then
@@ -356,6 +360,9 @@ end
 
 -- Return the nearest region at position.
 function M.nearest_region (pos)
+  if not Offset then
+    Offset = require ("visual-multi.offset")
+  end
   local regions = R_fn ()
   if #regions == 0 then
     return nil

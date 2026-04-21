@@ -550,9 +550,13 @@ function M.Region:remove_highlight ()
   local c = self.matches.cursor
 
   for _, m in ipairs (r) do
-    vim.fn.matchdelete (m)
+    if m and m > 0 then
+      pcall (vim.fn.matchdelete, m)
+    end
   end
-  vim.fn.matchdelete (c)
+  if c and c > 0 then
+    pcall (vim.fn.matchdelete, c)
+  end
 end
 
 -- Update the region highlight.
