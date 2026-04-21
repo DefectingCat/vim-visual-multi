@@ -218,12 +218,14 @@ function M.find_by_regex (mode)
   M._regex_pos = vim.fn.winsaveview ()
 
   -- Set up command-line mappings for regex mode
-  vim.fn.execute ("cnoremap <silent> <buffer> <cr> <cr>:call vm#commands#regex_done()<cr>")
   vim.fn.execute (
-    "cnoremap <silent><nowait><buffer> <esc><esc> <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>"
+    "cnoremap <silent> <buffer> <cr> <cr>:lua require('visual-multi.commands').regex_done()<cr>"
   )
   vim.fn.execute (
-    "cnoremap <silent><nowait><buffer> <esc> <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>"
+    "cnoremap <silent><nowait><buffer> <esc><esc> <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:lua require('visual-multi.commands').regex_abort()<cr>"
+  )
+  vim.fn.execute (
+    "cnoremap <silent><nowait><buffer> <esc> <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:lua require('visual-multi.commands').regex_abort()<cr>"
   )
 
   Funcs.special_statusline ("VM-REGEX")
@@ -965,13 +967,13 @@ end
 function M.visual_cursors ()
   -- Create a column of cursors from visual mode
   s_init (0, 1, 0)
-  vim.fn["vm#visual#cursors"] (vim.fn.visualmode ())
+  require ("visual-multi.visual").cursors (vim.fn.visualmode ())
 end
 
 function M.visual_add ()
   -- Convert a visual selection to a VM selection
   s_init (0, 1, 1)
-  vim.fn["vm#visual#add"] (vim.fn.visualmode ())
+  require ("visual-multi.visual").add (vim.fn.visualmode ())
 end
 
 function M.remove_every_n_regions (count)
@@ -1072,7 +1074,7 @@ function M.reselect_last ()
 
   local ok, err = pcall (function ()
     for _, r in ipairs (vim.b.VM_LastBackup.regions) do
-      vim.fn["vm#region#new"] (1, r.A, r.B)
+      require ("visual-multi.region").new (true, r.A, r.B)
     end
     vim.g.Vm.extend_mode = vim.b.VM_LastBackup.extend
     v.search = vim.b.VM_LastBackup.search

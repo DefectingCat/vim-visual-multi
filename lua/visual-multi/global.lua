@@ -828,7 +828,7 @@ end
 function M.check_multiline (region)
   if v.multiline == 0 then
     local regions_to_check
-    if region and type(region) == "table" then
+    if region and type (region) == "table" then
       regions_to_check = { region }
     else
       regions_to_check = R_fn ()

@@ -35,7 +35,7 @@ function M.setup ()
     last_ex = "",
     last_normal = "",
     last_visual = "",
-    registers = { ['"'] = {}, ["-"] = {} },
+    registers = { ["\""] = {}, ["-"] = {} },
     oldupdate = vim.fn.exists ("##TextYankPost") == 1 and 0 or vim.o.updatetime,
     maps = { permanent = {} },
     unmaps = {},

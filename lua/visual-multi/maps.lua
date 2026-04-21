@@ -226,17 +226,43 @@ function M._build_buffer_maps ()
 
   -- Ensure Vm.motions etc are initialized
   local Vm = vim.g.Vm or {}
-  Vm.motions = Vm.motions or {
-    "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", ",", ";",
-    "$", "0", "^", "%", "ge", "gE", "\\|",
-  }
+  Vm.motions = Vm.motions
+    or {
+      "h",
+      "j",
+      "k",
+      "l",
+      "w",
+      "W",
+      "b",
+      "B",
+      "e",
+      "E",
+      ",",
+      ";",
+      "$",
+      "0",
+      "^",
+      "%",
+      "ge",
+      "gE",
+      "\\|",
+    }
   Vm.find_motions = Vm.find_motions or { "f", "F", "t", "T" }
-  Vm.tobj_motions = Vm.tobj_motions or {
-    ["{"] = "{", ["}"] = "}", ["("] = "(", [")"] = ")",
-    ["g{"] = "[{", ["g}"] = "]}", ["g)"] = "])", ["g("] = "[(",
-  }
+  Vm.tobj_motions = Vm.tobj_motions
+    or {
+      ["{"] = "{",
+      ["}"] = "}",
+      ["("] = "(",
+      [")"] = ")",
+      ["g{"] = "[{",
+      ["g}"] = "]}",
+      ["g)"] = "])",
+      ["g("] = "[(",
+    }
   Vm.user_ops = Vm.user_ops or {}
-  Vm.select_motions = Vm.select_motions or { "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", "ge", "gE", "BBW" }
+  Vm.select_motions = Vm.select_motions
+    or { "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", "ge", "gE", "BBW" }
   vim.g.Vm = Vm
 
   -- Generate base buffer maps

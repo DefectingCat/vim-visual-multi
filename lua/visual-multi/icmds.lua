@@ -284,11 +284,11 @@ end
 function M.goto_next (next)
   -- Used in single region mode
   v.single_mode_running = 1
-  local t = ":call b:VM_Selection.Insert.key('" .. V.Insert.type .. "')\\<cr>"
+  local t = ":lua vim.b.VM_Selection.Insert:key('" .. V.Insert.type .. "')\\<cr>"
   if next then
-    return "<Esc>:call vm#commands#find_next(0,1)\\<cr>" .. t
+    return "<Esc>:lua require('visual-multi.commands').find_next(0,1)\\<cr>" .. t
   else
-    return "<Esc>:call vm#commands#find_prev(0,1)\\<cr>" .. t
+    return "<Esc>:lua require('visual-multi.commands').find_prev(0,1)\\<cr>" .. t
   end
 end
 

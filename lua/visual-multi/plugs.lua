@@ -147,8 +147,18 @@ function M.permanent ()
 
   -- Mouse mappings
   vim.keymap.set ("n", "<Plug>(VM-Left-Mouse)", "<LeftMouse>", { silent = true })
-  vim.keymap.set ("n", "<Plug>(VM-Mouse-Cursor)", "<LeftMouse><Plug>(VM-Add-Cursor-At-Pos)", { silent = true })
-  vim.keymap.set ("n", "<Plug>(VM-Mouse-Word)", "<LeftMouse><Plug>(VM-Find-Under)", { silent = true })
+  vim.keymap.set (
+    "n",
+    "<Plug>(VM-Mouse-Cursor)",
+    "<LeftMouse><Plug>(VM-Add-Cursor-At-Pos)",
+    { silent = true }
+  )
+  vim.keymap.set (
+    "n",
+    "<Plug>(VM-Mouse-Word)",
+    "<LeftMouse><Plug>(VM-Find-Under)",
+    { silent = true }
+  )
   vim.keymap.set ("n", "<Plug>(VM-Mouse-Column)", function ()
     Commands.mouse_column ()
   end, { silent = true })
@@ -181,13 +191,36 @@ function M.buffer ()
 
   -- Initialize motion lists
   vim.g.Vm.motions = {
-    "h", "j", "k", "l", "w", "W", "b", "B", "e", "E", ",", ";",
-    "$", "0", "^", "%", "ge", "gE", "\\|",
+    "h",
+    "j",
+    "k",
+    "l",
+    "w",
+    "W",
+    "b",
+    "B",
+    "e",
+    "E",
+    ",",
+    ";",
+    "$",
+    "0",
+    "^",
+    "%",
+    "ge",
+    "gE",
+    "\\|",
   }
   vim.g.Vm.find_motions = { "f", "F", "t", "T" }
   vim.g.Vm.tobj_motions = {
-    ["{"] = "{", ["}"] = "}", ["("] = "(", [")"] = ")",
-    ["g{"] = "[{", ["g}"] = "]}", ["g)"] = "])", ["g("] = "[(",
+    ["{"] = "{",
+    ["}"] = "}",
+    ["("] = "(",
+    [")"] = ")",
+    ["g{"] = "[{",
+    ["g}"] = "]}",
+    ["g)"] = "])",
+    ["g("] = "[(",
   }
 
   -- Select operator
@@ -652,7 +685,10 @@ function M.buffer ()
   end, { silent = true })
 
   vim.keymap.set ("n", "<Plug>(VM-Run-Last-Normal)", function ()
-    Edit.run_normal (vim.g.Vm.last_normal[0], { count = vim.v.count1, recursive = vim.g.Vm.last_normal[1] })
+    Edit.run_normal (
+      vim.g.Vm.last_normal[0],
+      { count = vim.v.count1, recursive = vim.g.Vm.last_normal[1] }
+    )
   end, { silent = true })
 
   vim.keymap.set ("n", "<Plug>(VM-Run-Visual)", function ()
@@ -699,10 +735,10 @@ function M.buffer ()
   vim.keymap.set ("i", "<Plug>(VM-I-CtrlC)", "<Esc>", { silent = true })
   vim.keymap.set ("i", "<Plug>(VM-I-CtrlO)", insert_key ("O"), { expr = true, silent = true })
   vim.keymap.set ("i", "<Plug>(VM-I-Next)", function ()
-    return Icmds.goto (1)
+    return Icmds.goto_next (1)
   end, { expr = true, silent = true })
   vim.keymap.set ("i", "<Plug>(VM-I-Prev)", function ()
-    return Icmds.goto (0)
+    return Icmds.goto_next (0)
   end, { expr = true, silent = true })
   vim.keymap.set ("i", "<Plug>(VM-I-Replace)", insert_key ("ins"), { expr = true, silent = true })
 

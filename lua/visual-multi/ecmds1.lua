@@ -68,7 +68,7 @@ function Edit.yank (reg, silent, ...)
   local register = (v.use_register ~= v.def_reg) and v.use_register or reg
 
   if not X_fn () then
-    vim.fn["vm#cursors#operation"] ("y", vim.v.count, register)
+    require ("visual-multi.cursors").operation ("y", vim.v.count, register)
     return
   end
   if not min_fn (1) then
@@ -106,12 +106,12 @@ function Edit.delete (X, register, count, manual)
     return
   end
   if not v.direction then
-    vim.fn["vm#commands#invert_direction"] ()
+    require ("visual-multi.commands").invert_direction ()
   end
 
   if not X then
     -- Ask for motion
-    vim.fn["vm#cursors#operation"] ("d", count, register)
+    require ("visual-multi.cursors").operation ("d", count, register)
     return
   end
 

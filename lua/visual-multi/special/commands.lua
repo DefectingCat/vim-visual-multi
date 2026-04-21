@@ -180,7 +180,7 @@ function M.filter_lines ()
     table.insert (txt, vim.fn.getline (l))
   end
 
-  vim.fn["vm#reset"] (1)
+  require ("visual-multi.vm").reset (true)
   source_buf = vim.fn.bufnr ("%")
 
   vim.cmd ("noautocmd keepalt botright new! VM\\ Filtered\\ Lines")
@@ -242,7 +242,7 @@ function M.regions_to_buffer ()
     table.insert (txt, t)
   end
 
-  vim.fn["vm#reset"] (1)
+  require ("visual-multi.vm").reset (true)
   source_buf = vim.fn.bufnr ("%")
 
   vim.cmd ("noautocmd keepalt botright new! VM\\ Filtered\\ Regions")
@@ -285,7 +285,7 @@ function M.save_regions ()
 
   -- Recreate regions
   for _, r in ipairs (saved_regions) do
-    vim.fn["vm#region#new"] (0, r.l, r.L, r.a, r.b)
+    require ("visual-multi.region").new (false, r.l, r.L, r.a, r.b)
   end
 
   Global.extend_mode ()
@@ -335,7 +335,9 @@ end
 function M._filter_regions_cmd (fill)
   filter_type = (filter_type + 1) % 3
   local args = filter_type .. ", '" .. fill .. "', 1"
-  return "<C-U><Esc>:call vm#special#commands#filter_regions(" .. args .. ")<cr>"
+  return "<C-U><Esc>:lua require('visual-multi.special.commands').filter_regions("
+    .. args
+    .. ")<cr>"
 end
 
 -- Mass transpose regions
@@ -401,7 +403,7 @@ end
 
 -- Fill quickfix list with regions
 function M.qfix (full_line)
-  vim.fn["vm#reset"] ()
+  require ("visual-multi.vm").reset ()
   local qfix = {}
 
   if full_line then
@@ -494,7 +496,7 @@ function M.search (bang, l1, l2, pattern)
   local view = vim.fn.winsaveview ()
 
   local ok, err = pcall (function ()
-    vim.fn["vm#init_buffer"] (1)
+    require ("visual-multi.vm").init_buffer (1)
     vim.g.Vm.extend_mode = 1
 
     if vim.fn.search (pat, "n") == 0 then
@@ -508,17 +510,17 @@ function M.search (bang, l1, l2, pattern)
     end
 
     if bang then
-      local r = vim.fn["vm#commands#find_next"] (0, 0)
+      local r = require ("visual-multi.commands").find_next (0, 0)
     elseif l1 == 1 and l2 == vim.fn.line ("$") then
-      vim.fn["vm#commands#find_next"] (0, 0)
-      local r = vim.fn["vm#commands#find_all"] (0, 0)
+      require ("visual-multi.commands").find_next (0, 0)
+      local r = require ("visual-multi.commands").find_all (0, 0)
     else
       local start = vim.fn.line2byte (l1)
       local end_ = vim.fn.line2byte (l2) + vim.fn.col ({ l2, "$" }) - 1
       local r = Global.get_all_regions (start, end_)
     end
 
-    vim.fn["vm#commands#reset_direction"] (1)
+    require ("visual-multi.commands").reset_direction (1)
     vim.fn.winrestview (view)
     Global.select_region_at_pos ({ r.l, r.a })
   end)

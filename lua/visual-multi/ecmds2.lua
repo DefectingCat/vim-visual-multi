@@ -67,7 +67,7 @@ function Edit.change (X, count, reg, smart_case)
     return
   end
   if not v.direction then
-    vim.fn["vm#commands#invert_direction"] ()
+    require ("visual-multi.commands").invert_direction ()
   end
   if smart_case and not v.smart_case_change then
     v.smart_case_change = 1
@@ -78,7 +78,7 @@ function Edit.change (X, count, reg, smart_case)
     v.changed_text = Edit.delete (true, use_reg, true, false)
     V.Insert.key ("i")
   else
-    vim.fn["vm#cursors#operation"] ("c", count, reg)
+    require ("visual-multi.cursors").operation ("c", count, reg)
   end
 end
 
@@ -103,11 +103,11 @@ function Edit.surround ()
     return
   end
   if not X_fn () then
-    vim.fn["vm#operators#select"] (1, "iw")
+    require ("visual-multi.operators").select (1, "iw")
   end
 
   if not v.direction then
-    vim.fn["vm#commands#invert_direction"] ()
+    require ("visual-multi.commands").invert_direction ()
   end
   v.W = Edit.store_widths ()
   local reselect = true
@@ -275,7 +275,7 @@ function Edit.align ()
     end
   end
   Global.update_and_select_region ()
-  vim.fn["vm#commands#motion"] ("l", 1, 0, 0)
+  require ("visual-multi.commands").motion ("l", 1, 0, 0)
 end
 
 -- ===========================================================================
@@ -293,7 +293,7 @@ function Edit.shift (dir)
     Edit.paste (false, false, true, "\"")
   else
     Edit.delete (true, "_", false, 0)
-    vim.fn["vm#commands#motion"] ("h", 1, 0, 0)
+    require ("visual-multi.commands").motion ("h", 1, 0, 0)
     Edit.paste (true, false, true, "\"")
   end
 end

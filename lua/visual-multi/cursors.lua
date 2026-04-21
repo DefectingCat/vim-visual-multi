@@ -363,28 +363,28 @@ function M._change_at_cursors (M_cmd, reg, n)
   local use_reg = reg ~= v.def_reg and reg or "_"
 
   if Obj == "_" then
-    vim.fn["vm#commands#motion"] ("^", 1, 0, 0)
-    vim.fn["vm#operators#select"] (1, "$")
+    require ("visual-multi.commands").motion ("^", 1, 0, 0)
+    require ("visual-multi.operators").select (1, "$")
     v.changed_text = Edit.delete (1, use_reg, 1, 0)
     Insert.key ("i")
   elseif vim.fn.index ({ "ip", "ap" }, Obj) >= 0 then
     Edit.run_normal ("d" .. Obj, { count = N, store = use_reg, recursive = recursive })
     Insert.key ("O")
-  elseif recursive and vim.fn.index (vim.fn["vm#comp#add_line"] (), Obj) >= 0 then
+  elseif recursive and vim.fn.index (require ("visual-multi.comp").add_line (), Obj) >= 0 then
     Edit.run_normal ("d" .. Obj, { count = N, store = use_reg })
     Insert.key ("O")
   elseif Obj == "$" then
-    vim.fn["vm#operators#select"] (1, "$")
+    require ("visual-multi.operators").select (1, "$")
     v.changed_text = Edit.delete (1, use_reg, 1, 0)
     Insert.key ("i")
   elseif Obj == "l" then
     Global.extend_mode ()
     if N and tonumber (N) > 1 then
-      vim.fn["vm#commands#motion"] ("l", tonumber (N) - 1, 0, 0)
+      require ("visual-multi.commands").motion ("l", tonumber (N) - 1, 0, 0)
     end
     vim.fn.feedkeys ("\"" .. use_reg .. "c")
   elseif M._forward (Obj) or (M._ia (Obj) and not M._inside (Obj)) then
-    vim.fn["vm#operators#select"] (1, N .. Obj)
+    require ("visual-multi.operators").select (1, N .. Obj)
     vim.fn.feedkeys ("\"" .. use_reg .. "c")
   else
     Edit.run_normal ("d" .. Obj, { count = N, store = use_reg, recursive = recursive })
@@ -414,8 +414,8 @@ function M._inside (c)
   end
   local inner = c:sub (2, 2)
   local valid_inner = vim.fn.split ("bBt[](){}\"" .. "'" .. "`<>", "\\zs")
-  -- Also check vm#comp#iobj()
-  local iobj = vim.fn["vm#comp#iobj"] ()
+  -- Also check comp.iobj()
+  local iobj = require ("visual-multi.comp").iobj ()
   return vim.fn.index (valid_inner, inner) >= 0 or vim.fn.index (iobj, inner) >= 0
 end
 

@@ -477,9 +477,10 @@ function M._bs_del (cmd)
     if V.Icmds and V.Icmds.x then
       return V.Icmds.x (cmd)
     end
-    -- Fallback: try vim fn
-    if vim.fn["vm#icmds#x"] then
-      return vim.fn["vm#icmds#x"] (cmd)
+    -- Fallback: try icmds module directly
+    local icmds = require ("visual-multi.icmds")
+    if icmds.x then
+      return icmds.x (cmd)
     end
   else
     M.process ("normal! " .. cmd)

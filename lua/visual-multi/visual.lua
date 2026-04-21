@@ -225,7 +225,7 @@ function M._vblock (extend)
   M._create_cursors (start, end_data)
 
   if extend and block_width > 0 then
-    vim.fn["vm#commands#motion"] ("l", block_width, 1, 0)
+    require ("visual-multi.commands").motion ("l", block_width, 1, 0)
   end
   return not inverted
 end
@@ -262,7 +262,7 @@ function M._create_cursors (start, end_data)
 
   if end_data[1] > start[1] then
     while vim.fn.line (".") < end_data[1] do
-      vim.fn["vm#commands#add_cursor_down"] (0, 1)
+      require ("visual-multi.commands").add_cursor_down (0, 1)
     end
   elseif not Global.region_at_pos () then
     -- Ensure there's at least a cursor

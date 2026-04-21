@@ -52,7 +52,7 @@ end
 local function init_operator ()
   vim.g.Vm.extend_mode = 1
   if not vim.g.Vm.buffer then
-    vim.fn["vm#init_buffer"] (0)
+    require ("visual-multi.vm").init_buffer (0)
   end
 end
 
@@ -187,7 +187,7 @@ function M._get_region (add_pattern)
     return R
   end
 
-  R = vim.fn["vm#region#new"] (0)
+  R = require ("visual-multi.region").new (false)
   -- R.txt can be different because yank != visual yank
   R.update_content ()
   if add_pattern then
@@ -231,7 +231,7 @@ function M.find (start, visual, ...)
   if vim.fn.search (vim.fn.join (v.search, "\\|"), "znp", endline) == 0 then
     M._merge_find ()
     if #R_fn () == 0 then
-      vim.fn["vm#reset"] (1)
+      require ("visual-multi.vm").reset (true)
     end
     return
   end

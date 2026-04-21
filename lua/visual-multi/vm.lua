@@ -490,7 +490,7 @@ local function set_reg ()
     v.yanked = 0
     local Vm = vim.g.Vm or {}
     Vm.registers = Vm.registers or {}
-    Vm.registers['"'] = {}
+    Vm.registers["\""] = {}
     vim.g.Vm = Vm
     if V.Funcs and V.Funcs.get_reg then
       v.oldreg = V.Funcs.get_reg (vim.v.register)
