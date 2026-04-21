@@ -65,7 +65,7 @@ function M.x (cmd)
   local active = R_fn ()[V.Insert.index]
 
   for _, r in ipairs (R_fn ()) do
-    if v.single_region and r ~= active then
+    if v.single_region == 1 and r ~= active then
       if r.l == active.l then
         r.shift (change, change)
       end

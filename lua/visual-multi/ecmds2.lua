@@ -66,7 +66,7 @@ function Edit.change (X, count, reg, smart_case)
   if #R_fn () == 0 then
     return
   end
-  if not v.direction then
+  if v.direction == 0 then
     require ("visual-multi.commands").invert_direction ()
   end
   if smart_case and not v.smart_case_change then
@@ -102,11 +102,11 @@ function Edit.surround ()
   if #R_fn () == 0 then
     return
   end
-  if not X_fn () then
+  if X_fn () == 0 then
     require ("visual-multi.operators").select (1, "iw")
   end
 
-  if not v.direction then
+  if v.direction == 0 then
     require ("visual-multi.commands").invert_direction ()
   end
   v.W = Edit.store_widths ()
@@ -246,7 +246,7 @@ end
 -- ===========================================================================
 
 function Edit.align ()
-  if v.multiline then
+  if v.multiline == 1 then
     return Funcs.msg ("Not possible, multiline is enabled.")
   end
   Global.cursor_mode ()
@@ -319,7 +319,7 @@ function Edit._numbers (start, step, separator, append)
   end
 
   -- Paste string before/after the cursor/selection
-  if X_fn () then
+  if X_fn () == 1 then
     local new_text = {}
     for i, r in ipairs (R_fn ()) do
       if append then
@@ -395,7 +395,7 @@ end
 -- ===========================================================================
 
 function M._min (n)
-  return X_fn () and #R_fn () >= n
+  return X_fn () == 1 and #R_fn () >= n
 end
 
 return M

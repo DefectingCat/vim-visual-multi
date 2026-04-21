@@ -56,7 +56,7 @@ end
 -- Local helper: update search patterns and the @/ register.
 -- Equivalent to s:update_search(p) in VimScript.
 local function update_search (pat)
-  if v.no_search then
+  if v.no_search == 1 then
     return
   end
 
@@ -80,7 +80,7 @@ end
 function M.get_pattern (register)
   local text = vim.fn.getreg (register)
   local t = M.escape_pattern (text)
-  local pat = v.whole_word and ("\\<" .. t .. "\\>") or t
+  local pat = v.whole_word == 1 and ("\\<" .. t .. "\\>") or t
 
   -- If whole word, ensure the pattern can actually be found
   local found = vim.fn.search (pat, "ncw")

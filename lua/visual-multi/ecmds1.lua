@@ -41,7 +41,7 @@ function M.init ()
     return vim.g.Vm and vim.g.Vm.extend_mode or 0
   end
   min_fn = function (n)
-    return X_fn () and #R_fn () >= n
+    return X_fn () == 1 and #R_fn () >= n
   end
 
   -- Merge with ecmds2
@@ -67,7 +67,7 @@ function Edit.yank (reg, silent, ...)
   -- Yank the regions contents in a VM register
   local register = (v.use_register ~= v.def_reg) and v.use_register or reg
 
-  if not X_fn () then
+  if X_fn () == 0 then
     require ("visual-multi.cursors").operation ("y", vim.v.count, register)
     return
   end
@@ -105,7 +105,7 @@ function Edit.delete (X, register, count, manual)
   if Funcs.no_regions () then
     return
   end
-  if not v.direction then
+  if v.direction == 0 then
     require ("visual-multi.commands").invert_direction ()
   end
 
@@ -164,7 +164,7 @@ end
 
 function Edit.xdelete (key, cnt)
   -- Delete with 'x' or 'X' key, use black hole register in extend mode
-  if X_fn () then
+  if X_fn () == 1 then
     Edit.delete (1, "_", cnt, 1)
   else
     Edit.run_normal (key, { count = cnt, recursive = 0 })
@@ -235,7 +235,7 @@ function Edit.block_paste (before)
         vim.cmd ("normal! P")
       else
         vim.cmd ("normal! p")
-        if not v.dont_move_cursors then
+        if v.dont_move_cursors == 0 then
           r.update_cursor_pos ()
         end
       end
@@ -246,7 +246,7 @@ function Edit.block_paste (before)
       break
     end
   end
-  v.dont_move_cursors = nil
+  v.dont_move_cursors = 0
   Funcs.restore_reg ()
 end
 
@@ -256,13 +256,13 @@ end
 
 function Edit.replace_chars ()
   -- Replace single characters or selections with character
-  if X_fn () then
+  if X_fn () == 1 then
     local char = vim.fn.nr2char (vim.fn.getchar ())
     if char:upper () == "<ESC>" then
       return
     end
 
-    if v.multiline then
+    if v.multiline == 1 then
       Funcs.toggle_option ("multiline")
       Global.remove_empty_lines ()
     end
@@ -295,7 +295,7 @@ end
 
 function Edit.replace ()
   -- Replace a pattern in all regions, or start replace mode
-  if not X_fn () then
+  if X_fn () == 0 then
     V.Insert.replace = 1
     return V.Insert.key ("i")
   end
@@ -330,7 +330,7 @@ end
 
 function Edit.replace_expression ()
   -- Replace all regions with the result of an expression
-  if not X_fn () then
+  if X_fn () == 0 then
     return
   end
   local ix = v.index
@@ -454,7 +454,7 @@ function Edit.fill_register (reg, text, force_ow)
   -- Write custom and possibly vim registers
 
   -- If doing a change/deletion, write the VM - register
-  if v.deleting then
+  if v.deleting == 1 then
     vim.g.Vm.registers["-"] = text
     v.deleting = 0
   end
@@ -470,7 +470,7 @@ function Edit.fill_register (reg, text, force_ow)
   for _, t in ipairs (text) do
     maxw = math.max (maxw, #t)
   end
-  local type = v.multiline and "V" or (#R_fn () > 1 and "b" .. maxw or "v")
+  local type = v.multiline == 1 and "V" or (#R_fn () > 1 and "b" .. maxw or "v")
 
   -- Set VM register, overwrite backup register unless temporary
   if not temp_reg then

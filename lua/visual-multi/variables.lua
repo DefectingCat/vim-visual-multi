@@ -88,26 +88,26 @@ function M.init ()
   vars.IDs_list = {}
   vars.ID = 0
   vars.index = -1
-  vars.direction = 1
-  vars.nav_direction = 1
-  vars.auto = 0
-  vars.silence = 0
-  vars.eco = 0
-  vars.single_region = 0
-  vars.using_regex = 0
-  vars.multiline = 0
-  vars.yanked = 0
-  vars.merge = 0
-  vars.insert = 0
-  vars.whole_word = 0
-  vars.winline = 0
-  vars.restore_scroll = 0
-  vars.find_all_overlap = 0
+  vars.direction = 1       -- [0/1]
+  vars.nav_direction = 1   -- [0/1]
+  vars.auto = 0            -- [0/1]
+  vars.silence = 0         -- [0/1]
+  vars.eco = 0             -- [0/1]
+  vars.single_region = 0   -- [0/1]
+  vars.using_regex = 0     -- [0/1]
+  vars.multiline = 0       -- [0/1]
+  vars.yanked = 0          -- [0/1]
+  vars.merge = 0           -- [0/1]
+  vars.insert = 0          -- [0/1]
+  vars.whole_word = 0      -- [0/1]
+  vars.winline = 0         -- [0/1]
+  vars.restore_scroll = 0  -- [0/1]
+  vars.find_all_overlap = 0 -- [0/1]
   vars.dot = ""
-  vars.no_search = 0
-  vars.visual_regex = 0
+  vars.no_search = 0       -- [0/1]
+  vars.visual_regex = 0    -- [0/1]
   vars.use_register = vars.def_reg
-  vars.deleting = 0
+  vars.deleting = 0        -- [0/1]
   vars.vmarks = { vim.fn.getpos ("'<"), vim.fn.getpos ("'>") }
 end
 
@@ -144,9 +144,9 @@ end
 function M.reset_globals ()
   vim.b.VM_Backup = {}
   vim.b.VM_Selection = {}
-  vim.g.Vm.buffer = 0
-  vim.g.Vm.extend_mode = 0
-  vim.g.Vm.finding = 0
+  vim.g.Vm.buffer = 0      -- [0/1]
+  vim.g.Vm.extend_mode = 0 -- [0/1]
+  vim.g.Vm.finding = 0     -- [0/1]
 end
 
 -- Initialize module with state

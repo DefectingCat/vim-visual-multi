@@ -51,7 +51,7 @@ end
 -- Initialize for operator mode
 local function init_operator ()
   vim.g.Vm.extend_mode = 1
-  if not vim.g.Vm.buffer then
+  if not vim.g.Vm.buffer or vim.g.Vm.buffer == 0 then
     require ("visual-multi.vm").init_buffer (0)
   end
 end
@@ -167,7 +167,7 @@ end
 
 function M.after_yank ()
   -- Find operator
-  if vim.g.Vm.finding then
+  if vim.g.Vm.finding and vim.g.Vm.finding ~= 0 then
     vim.g.Vm.finding = 0
     M.find (0, v.visual_regex)
     v.visual_regex = 0
@@ -203,7 +203,7 @@ end
 
 function M.find (start, visual, ...)
   if start then
-    if not vim.g.Vm.buffer then
+    if not vim.g.Vm.buffer or vim.g.Vm.buffer == 0 then
       M._backup_map_find ()
       if visual then
         -- Use search register if just starting from visual mode
@@ -216,7 +216,7 @@ function M.find (start, visual, ...)
 
     M._updatetime ()
     vim.g.Vm.finding = 1
-    v.vblock = visual and vim.fn.mode () == "\22" -- <C-v>
+    v.vblock = visual and vim.fn.mode () == "\22" and 1 or 0 -- <C-v>
     vim.cmd ("silent! nunmap <buffer> y")
     return "y"
   end
@@ -240,7 +240,7 @@ function M.find (start, visual, ...)
   vim.o.wrapscan = false
   vim.cmd ("silent keepjumps normal! ygn")
 
-  if v.vblock then
+  if v.vblock == 1 then
     local R = vim.fn.getpos (".")[3]
     if not (R < startcol or R > endcol) then
       Global.new_region ()
@@ -256,7 +256,7 @@ function M.find (start, visual, ...)
     vim.cmd ("silent keepjumps normal! nygn")
     if vim.fn.getpos ("'[")[2] > endline then
       break
-    elseif v.vblock then
+    elseif v.vblock == 1 then
       local R = vim.fn.getpos (".")[3]
       if not (R < startcol or R > endcol) then
         Global.new_region ()

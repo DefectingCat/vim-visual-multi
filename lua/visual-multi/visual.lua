@@ -148,7 +148,7 @@ function M.split ()
   if #R_fn () == 0 then
     return
   end
-  if not X_fn () then
+  if X_fn () == 0 then
     Funcs.msg ("Not in cursor mode.")
     return
   end

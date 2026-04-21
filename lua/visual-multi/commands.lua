@@ -52,12 +52,18 @@ end
 -- ===========================================================================
 
 local function s_init (whole, init_type, extend_mode)
-  if extend_mode then
+  -- Ensure global Vm state is initialized
+  if not vim.g.Vm or not vim.g.Vm.maps then
+    local Plugin = require ("visual-multi.plugin")
+    Plugin.setup ()
+  end
+
+  if extend_mode and extend_mode ~= 0 then
     vim.g.Vm.extend_mode = 1
   end
 
-  if vim.g.Vm.buffer then
-    if v.using_regex then
+  if vim.g.Vm.buffer and vim.g.Vm.buffer ~= 0 then
+    if v.using_regex == 1 then
       M.regex_reset ()
     end
     v.whole_word = whole
@@ -79,10 +85,10 @@ end
 
 function M.add_cursor_at_pos (extend)
   -- Set extend mode if starting
-  local already_active = s_init (0, 1, extend or false) == 0
-    and vim.g.VM_add_cursor_at_pos_no_mappings == 0
+  local just_started = (s_init (0, 1, extend or false) == 0
+    and vim.g.VM_add_cursor_at_pos_no_mappings == 0) and 1 or 0
 
-  if already_active == 0 and vim.g.VM_add_cursor_at_pos_no_mappings then
+  if just_started == 1 and vim.g.VM_add_cursor_at_pos_no_mappings then
     -- Disable mappings if option set
     if V.Maps and V.Maps.disable then
       V.Maps.disable (1)
@@ -133,7 +139,7 @@ function M.add_cursor_down (extend, count)
     return
   end
 
-  s_init (0, 1, X_fn () or extend)
+  s_init (0, 1, X_fn () == 1 and 1 or extend)
   v.vertical_col = Funcs.get_vertcol ()
   Global.new_cursor ()
 
@@ -157,7 +163,7 @@ function M.add_cursor_up (extend, count)
     return
   end
 
-  s_init (0, 1, X_fn () or extend)
+  s_init (0, 1, X_fn () == 1 and 1 or extend)
   v.vertical_col = Funcs.get_vertcol ()
   Global.new_cursor ()
 
@@ -202,7 +208,7 @@ end
 
 function M.find_by_regex (mode)
   -- Entry point for VM regex search
-  if not vim.g.Vm.buffer then
+  if not vim.g.Vm or not vim.g.Vm.buffer or vim.g.Vm.buffer == 0 then
     s_init (0, 2, 1)
   end
 
@@ -234,11 +240,11 @@ end
 
 function M.regex_done ()
   -- Terminate the VM regex mode after entering search pattern
-  v.visual_regex = v.using_regex == 2
+  v.visual_regex = v.using_regex == 2 and 1 or 0
   local extend_current = v.using_regex == 3
   M.regex_reset ()
 
-  if v.visual_regex then
+  if v.visual_regex == 1 then
     Search.get_slash_reg ()
     vim.g.Vm.finding = 1
     vim.cmd ("silent keepjumps normal! gv")
@@ -313,7 +319,7 @@ function M.ctrln (count)
   else
     for i = 1, count do
       M.find_under (0, 1, 1)
-      if no_reselect and v.was_region_at_pos then
+      if no_reselect and v.was_region_at_pos == 1 then
         break
       end
     end
@@ -330,7 +336,7 @@ function M.find_under (visual, whole, ...)
   end
 
   -- Yank and create region
-  if not visual then
+  if not visual or visual == 0 then
     vim.cmd ("normal! viwy`]")
   end
 
@@ -358,7 +364,7 @@ function M.find_all (visual, whole)
   local pos = { pos_data[2], pos_data[3] }
   v.eco = 1
 
-  if not visual then
+  if not visual or visual == 0 then
     local R = Global.region_at_pos ()
     if not R or vim.tbl_isempty (R) then
       R = M.find_under (0, whole)
@@ -432,7 +438,7 @@ local function get_region (next)
     R = get_prev ()
   end
 
-  if v.was_region_at_pos then
+  if v.was_region_at_pos == 1 then
     if vim.g.VM_notify_previously_selected == 2 then
       vim.cmd ("normal! ``")
       Funcs.msg ("Already selected")
@@ -540,7 +546,7 @@ function M.skip (just_remove)
     if r and not vim.tbl_isempty (r) then
       return Global.remove_last_region (r.id)
     end
-  elseif v.nav_direction then
+  elseif v.nav_direction == 1 then
     return M.find_next (1, 0)
   else
     return M.find_prev (1, 0)
@@ -619,7 +625,7 @@ function M.motion (motion, count, select_flag, single)
   s_init (0, 1, select_flag)
 
   -- Create cursor if needed
-  if not vim.g.Vm.buffer or Funcs.no_regions () or (single and not is_r ()) then
+  if not vim.g.Vm or not vim.g.Vm.buffer or vim.g.Vm.buffer == 0 or Funcs.no_regions () or (single and not is_r ()) then
     Global.new_cursor ()
   end
 
@@ -636,7 +642,7 @@ function M.motion (motion, count, select_flag, single)
     vim.g.Vm.extend_mode = 1
   end
 
-  if select_flag and not v.multiline and vertical (motion) then
+  if select_flag and v.multiline == 0 and vertical (motion) then
     Funcs.toggle_option ("multiline")
   end
 
@@ -694,7 +700,7 @@ function M.regex_motion (regex, count, remove)
   M._before_move ()
 
   local regions
-  if v.single_region then
+  if v.single_region == 1 then
     regions = { R }
   else
     regions = R_fn ()
@@ -703,7 +709,7 @@ function M.regex_motion (regex, count, remove)
   if v.direction == 1 then
     for _, r in ipairs (regions) do
       vim.fn.cursor (r.L, r.b)
-      local endl = v.multiline and regex ~= "" and vim.fn.line ("$") or r.L
+      local endl = v.multiline == 1 and regex ~= "" and vim.fn.line ("$") or r.L
       if vim.fn.search (pattern .. case_flag, "z", endl) == 0 then
         if remove then
           r.remove ()
@@ -722,7 +728,7 @@ function M.regex_motion (regex, count, remove)
   else
     for _, r in ipairs (regions) do
       vim.fn.cursor (r.l, r.a)
-      local endl = v.multiline and regex ~= "" and vim.fn.line ("$") or r.l
+      local endl = v.multiline == 1 and regex ~= "" and vim.fn.line ("$") or r.l
       if vim.fn.search (pattern .. case_flag, "b", endl) == 0 then
         if remove then
           r.remove ()
@@ -764,7 +770,7 @@ function M._call_motion (...)
   local R = R_fn ()[v.index + 1]
 
   local regions
-  if select ("#", ...) > 0 and select (1, ...) or v.single_region then
+  if select ("#", ...) > 0 and select (1, ...) or v.single_region == 1 then
     regions = { R }
   else
     regions = R_fn ()
@@ -789,9 +795,9 @@ end
 
 function M._after_move (R)
   v.direction = R.dir
-  v.restore_scroll = not v.insert
+  v.restore_scroll = (v.insert == 0) and 1 or 0
 
-  if v.merge then
+  if v.merge == 1 then
     Global.select_region (R.index)
     Funcs.Scroll.get (1)
     Global.update_and_select_region (R.A)
@@ -896,7 +902,7 @@ end
 
 function M.invert_direction (...)
   -- Invert direction and reselect region
-  if Funcs.no_regions () or v.auto then
+  if Funcs.no_regions () or v.auto == 1 then
     return
   end
 
@@ -928,7 +934,7 @@ end
 
 function M.reset_direction (...)
   -- Resets regions facing
-  if Funcs.no_regions () or v.auto then
+  if Funcs.no_regions () or v.auto == 1 then
     return
   end
 
@@ -1066,9 +1072,9 @@ function M.reselect_last ()
     return Funcs.exit ("No regions to restore")
   end
 
-  if was_active and X_fn () == 0 then
+  if was_active == 1 and X_fn () == 0 then
     Global.erase_regions ()
-  elseif was_active then
+  elseif was_active == 1 then
     return Funcs.msg ("Not in extend mode.")
   end
 

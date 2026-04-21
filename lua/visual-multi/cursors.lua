@@ -195,7 +195,7 @@ end
 function M._process (op, M_cmd, reg, n)
   -- Process the whole command
   v.dot = M_cmd
-  v.deleting = op == "d" or op == "c"
+  v.deleting = (op == "d" or op == "c") and 1 or 0
 
   if op == "d" then
     M._delete_at_cursors (M_cmd, reg, n)
