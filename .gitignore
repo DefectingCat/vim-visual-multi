@@ -8,3 +8,4 @@ test.log
 __pycache__
 test/.python-version
 .omc/
+other/
